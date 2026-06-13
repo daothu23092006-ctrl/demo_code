@@ -54,7 +54,8 @@ def bmi_info(bmi):
             return label, goals, icon
     return "Béo phì", ["Giảm cân"], "🔴"       # Nếu mà BMI cao quá thì gán Béo Phì luôn
 
-ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà/Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
+# [FIX 3] Tách "Gà/Vịt" → "Gà" và "Vịt" cho khớp token trong CSV
+ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
 # Header của app 
@@ -80,7 +81,7 @@ if not st.session_state.profile_done:
 
     gender = st.radio("Giới tính", ["Nam", "Nữ"], horizontal=True)
 
-    # Tính BMI tạm thời để hiển thị nhãn và mục tiêu phù hợp ngay khi nhập thông tin, giúp người dùng hiểu rõ hơn về tình trạng sức khoẻ của mình.  
+    # Tính BMI tạm thời để hiển thị nhãn và mục tiêu phù hợp ngay khi nhập thông tin
     bmi_temp = calc_bmi(weight, height)
     bmi_class, allowed_goals, bmi_icon = bmi_info(bmi_temp)
     st.info(f"{bmi_icon} **BMI: {bmi_temp:.1f}** — {bmi_class}  ·  Mục tiêu phù hợp: **{' / '.join(allowed_goals)}**")
@@ -102,7 +103,7 @@ if not st.session_state.profile_done:
 else:
     p = st.session_state.profile
 
-    # Sidebar: hiển thị thông tin hồ sơ người dùng và chỉ số sức khoẻ cơ bản, có nút để quay lại chỉnh sửa.
+    # Sidebar: hiển thị thông tin hồ sơ người dùng và chỉ số sức khoẻ cơ bản
     with st.sidebar:
         st.markdown("### 👤 Hồ sơ của bạn")
         st.markdown(f"""
@@ -128,15 +129,14 @@ else:
             st.session_state.profile_done = False
             st.rerun()
 
-    # Chỉ số sức khoẻ 
+    # Chỉ số sức khoẻ
     bmi  = calc_bmi(p["weight"], p["height"])
     bmr  = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
     tdee = calc_tdee(bmr, p["activity"])
     tdee_adj_preview = adjust_tdee(tdee, p["goal"], p["gender"])
     bmi_class, _, bmi_icon = bmi_info(bmi)
- 
- 
-    # badge màu theo BMI
+
+    # Badge màu theo BMI
     badge_cfg = {
         "Bình thường":          ("#e6f9ef", "#27ae60"),
         "Thiếu cân nhẹ":        ("#fff9e6", "#e67e22"),
@@ -147,10 +147,10 @@ else:
     badge_bg, badge_color = badge_cfg.get(bmi_class, ("#eee", "#555"))
     bmi_pct = max(0, min(100, int((bmi - 14) / (32 - 14) * 100)))
     gender_icon = "♂️" if p["gender"] == "Nam" else "♀️"
- 
+
     st.markdown("#### 🧠 Chỉ số sức khoẻ")
 
-    # Row 1: 2 card hiển thị chỉ số BMI + TDEE 
+    # Row 1: 2 card BMI + TDEE
     col_bmi, col_tdee = st.columns(2)
     with col_bmi:
         st.markdown(f"""
@@ -172,11 +172,10 @@ else:
   <div style="font-size:1.7rem;font-weight:800;color:#1a1a1a;margin:0.1rem 0">{tdee:,.0f} <span style="font-size:0.8rem;font-weight:400;color:#aaa">kcal</span></div>
   <div style="font-size:0.75rem;color:#3a5bd9;font-weight:600">Mục tiêu: {tdee_adj_preview:,.0f} kcal</div>
   <div style="font-size:0.7rem;color:#aaa;margin-top:0.3rem">{p['activity']}</div>
-  <div style="font-size:0.7rem;color:#aaa;margin-top:0.15rem">{delta_label}</div>
 </div>
 """, unsafe_allow_html=True)
 
-    # Row 2: 4 card hiển thị thông tin cá nhân (chiều cao, cân nặng, tuổi, giới tính)
+    # Row 2: 4 card thông tin cá nhân
     st.write("")
     s1, s2, s3, s4 = st.columns(4)
     for col, icon, val, lbl in [
@@ -196,7 +195,7 @@ else:
 
     st.divider()
 
-    # Tùy chọn gợi ý thực đơn trong ngày: chế độ ăn, nguồn đạm yêu thích, chế độ bữa trưa/tối, bữa phụ
+    # Tùy chọn gợi ý thực đơn trong ngày
     st.markdown("#### 🌅 Hôm nay ăn gì?")
 
     diet_type = st.radio("Chế độ ăn", ["Mặn", "Chay"], horizontal=True)
@@ -213,9 +212,10 @@ else:
 
     col1, col2 = st.columns(2)
     with col1:
-        lunch_mode = st.radio("Bữa trưa", ["Cơm + món ăn", "Món độc lập (bún, phở...)"], horizontal=True)
+        # [FIX 4] Giữ đúng label "Cơm + món" để khớp với recommender.py
+        lunch_mode = st.radio("Bữa trưa", ["Cơm + món", "Món độc lập (bún, phở...)"], horizontal=True)
     with col2:
-        dinner_mode = st.radio("Bữa tối", ["Cơm + món ăn", "Món độc lập"], horizontal=True)
+        dinner_mode = st.radio("Bữa tối", ["Cơm + món", "Món độc lập"], horizontal=True)
     snack_mode = st.radio("Bữa phụ", ["Không có", "Đồ uống", "Ăn vặt", "Đồ ngọt"], horizontal=True)
 
     st.write("")
@@ -224,7 +224,8 @@ else:
         has_snack = snack_mode != "Không có"
         targets   = calc_meal_targets(tdee_adj, p["goal"], has_snack)
 
-        st.success(f"💡 Mục tiêu hôm nay: **{tdee_adj:,.0f} kcal** · {delta_map[p['goal']]}")
+        # [FIX 2] Bỏ delta_map, chỉ hiện calo mục tiêu
+        st.success(f"💡 Mục tiêu hôm nay: **{tdee_adj:,.0f} kcal**")
 
         with st.spinner("Đang tìm món phù hợp..."):
             suggestions = recommend_day(
