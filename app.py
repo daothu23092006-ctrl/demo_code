@@ -148,10 +148,11 @@ if "profile" not in st.session_state:
 
 # ── BMI logic (WHO Asia-Pacific) ──────────────────────────────────────────────
 BMI_RANGES = [
-    (0,    18.5, "Thiếu cân",   ["Tăng cân"],                        "thin",   "🟡"),
-    (18.5, 23.0, "Bình thường", ["Giảm cân", "Duy trì", "Tăng cân"], "normal", "🟢"),
-    (23.0, 27.5, "Thừa cân",    ["Giảm cân", "Duy trì"],             "fat",    "🟠"),
-    (27.5, 999,  "Béo phì",     ["Giảm cân"],                        "obese",  "🔴"),
+    (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
+    (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
+    (18.5, 23.0, "Bình thường",          ["Giảm cân", "Duy trì", "Tăng cân"], "🟢"),
+    (23.0, 25.0, "Thừa cân",             ["Giảm cân", "Duy trì"],             "🟠"),
+    (25.0, 999,  "Béo phì",              ["Giảm cân"],                        "🔴"),
 ]
 
 def bmi_info(bmi):
@@ -160,7 +161,24 @@ def bmi_info(bmi):
             return label, goals, css, icon
     return "Béo phì", ["Giảm cân"], "obese", "🔴"
 
-ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà/Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
+def get_health_score(bmi):
+
+    if bmi < 17:
+        return 60, "Thiếu cân"
+
+    elif bmi < 18.5:
+        return 75, "Thiếu cân nhẹ"
+
+    elif bmi < 23:
+        return 100, "Tốt"
+
+    elif bmi < 25:
+        return 80, "Thừa cân"
+
+    else:
+        return 60, "Béo phì"
+
+ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gia cầm", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
 # ── Header ────────────────────────────────────────────────────────────────────
@@ -183,7 +201,7 @@ if not st.session_state.profile_done:
         height = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=250.0, value=165.0, step=0.5)
         weight = st.number_input("Cân nặng (kg)",  min_value=30.0,  max_value=200.0, value=60.0,  step=0.5)
     with col2:
-        age      = st.number_input("Tuổi", min_value=20, max_value=49, value=22, help="Hỗ trợ độ tuổi 20–49")
+        age = st.number_input("Tuổi", min_value=20, max_value=49, value=22)
         activity = st.selectbox("Mức độ vận động",
                       ["Ít vận động", "Vận động nhẹ", "Vận động vừa", "Vận động nhiều"])
 
@@ -229,10 +247,10 @@ else:
 | Hoạt động | {p['activity']} |
 | Mục tiêu | {p['goal']} |
 """)
-        bmi_s      = calc_bmi(p["weight"], p["height"])
+        bmi_s = calc_bmi(p["weight"], p["height"])
         bmi_cls_s, _, _, _ = bmi_info(bmi_s)
-        bmr_s      = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
-        tdee_s     = calc_tdee(bmr_s, p["activity"])
+        bmr_s  = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
+        tdee_s = calc_tdee(bmr_s, p["activity"])
         tdee_adj_s = adjust_tdee(tdee_s, p["goal"], p["gender"])
         st.divider()
         st.metric("BMI", f"{bmi_s:.1f}", bmi_cls_s)
