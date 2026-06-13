@@ -11,11 +11,11 @@ st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="🍚", layout="cen
 # ── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-[data-testid="stAppViewContainer"] { background: #f0f2f5; }
+[data-testid="stAppViewContainer"] { background: #f5f5f5; }
 [data-testid="stMain"] > div { padding-top: 1rem; }
 section[data-testid="stSidebar"] { background: #fff; }
 .block-container {
-    max-width: 460px !important;
+    max-width: 430px !important;
     padding: 0 1rem 2rem !important;
     margin: 0 auto !important;
 }
@@ -40,18 +40,41 @@ section[data-testid="stSidebar"] { background: #fff; }
     font-size: 0.95rem; font-weight: 700; color: #1a1a1a;
     margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;
 }
-[data-testid="stNumberInput"] input { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; padding: 0.65rem 1rem !important; font-size: 1rem !important; color: #1a1a1a !important; }
-[data-testid="stNumberInput"] input:focus { border-color: #FF6B6B !important; background: #fff !important; box-shadow: 0 0 0 3px rgba(255,107,107,0.12) !important; }
+[data-testid="stNumberInput"] input,
+[data-testid="stTextInput"] input {
+    border-radius: 14px !important;
+    border: 1.5px solid #f0f0f0 !important;
+    background: #fafafa !important;
+    padding: 0.65rem 1rem !important;
+    font-size: 1rem !important;
+    color: #1a1a1a !important;
+}
+[data-testid="stNumberInput"] input:focus {
+    border-color: #FF6B6B !important;
+    background: #fff !important;
+    box-shadow: 0 0 0 3px rgba(255,107,107,0.12) !important;
+}
 [data-testid="stRadio"] > div { flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5rem !important; }
-[data-testid="stRadio"] label { border-radius: 50px !important; border: 1.5px solid #e8e8e8 !important; padding: 0.4rem 1rem !important; font-size: 0.85rem !important; font-weight: 500 !important; color: #555 !important; background: #fafafa !important; cursor: pointer !important; }
-[data-testid="stRadio"] label:has(input:checked) { background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }
-[data-testid="stSelectbox"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
-[data-testid="stMultiSelect"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
+[data-testid="stRadio"] label {
+    border-radius: 50px !important; border: 1.5px solid #e8e8e8 !important;
+    padding: 0.4rem 1rem !important; font-size: 0.85rem !important;
+    font-weight: 500 !important; color: #555 !important;
+    background: #fafafa !important; cursor: pointer !important;
+}
+[data-testid="stRadio"] label:has(input:checked) {
+    background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important;
+}
+[data-testid="stSelectbox"] > div > div {
+    border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important;
+}
+[data-testid="stMultiSelect"] > div > div {
+    border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important;
+}
 [data-testid="stButton"] > button[kind="primary"] {
     background: linear-gradient(135deg, #FF6B6B, #FF8E53) !important;
-    color: #fff !important; border: none !important; border-radius: 50px !important;
-    padding: 0.7rem 1.5rem !important; font-size: 1rem !important;
-    font-weight: 600 !important; width: 100% !important;
+    color: #fff !important; border: none !important;
+    border-radius: 50px !important; padding: 0.7rem 1.5rem !important;
+    font-size: 1rem !important; font-weight: 600 !important; width: 100% !important;
     box-shadow: 0 4px 15px rgba(255,107,107,0.35) !important;
 }
 [data-testid="stButton"] > button:not([kind="primary"]) {
@@ -59,8 +82,6 @@ section[data-testid="stSidebar"] { background: #fff; }
     background: #fafafa !important; color: #555 !important;
     font-size: 0.85rem !important; padding: 0.4rem 1.2rem !important;
 }
-
-/* ── BMI box (bước 1) ── */
 .bmi-box { border-radius: 16px; padding: 1rem 1.25rem; margin: 1rem 0; }
 .bmi-box.normal { background: #eafaf1; border-left: 4px solid #2ecc71; }
 .bmi-box.thin   { background: #fff9e6; border-left: 4px solid #f39c12; }
@@ -68,90 +89,33 @@ section[data-testid="stSidebar"] { background: #fff; }
 .bmi-box.obese  { background: #fde8e8; border-left: 4px solid #e74c3c; }
 .bmi-val   { font-size: 1.5rem; font-weight: 800; }
 .bmi-label { font-size: 0.8rem; color: #666; margin-top: 0.1rem; }
-
-/* ── Health card (bước 2) — style theo ảnh ── */
-.health-page {
-    background: #fff;
-    border-radius: 20px;
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+.health-card {
+    background: #fff; border-radius: 20px; padding: 1.25rem;
+    margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
-.health-page-title {
-    font-size: 1rem; font-weight: 700; color: #1a1a1a;
-    text-align: center; margin-bottom: 1.25rem;
+.health-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+.health-metric {
+    flex: 1; background: #fafafa; border-radius: 16px;
+    border: 1.5px solid #f0f0f0; padding: 1rem; text-align: center;
 }
-
-/* BMI số lớn */
-.bmi-hero { text-align: center; margin-bottom: 0.75rem; }
-.bmi-hero .bmi-big { font-size: 3rem; font-weight: 800; color: #1a1a1a; line-height: 1; }
-.bmi-hero .bmi-badge {
-    display: inline-block; margin-top: 0.4rem;
-    padding: 0.25rem 0.9rem; border-radius: 50px;
-    font-size: 0.82rem; font-weight: 600;
+.health-metric .metric-val { font-size: 1.6rem; font-weight: 800; color: #FF6B6B; line-height: 1; }
+.health-metric .metric-unit { font-size: 0.75rem; color: #999; margin-top: 0.15rem; }
+.health-metric .metric-label { font-size: 0.78rem; color: #555; margin-top: 0.4rem; font-weight: 600; }
+.health-metric .metric-tag {
+    display: inline-block; margin-top: 0.35rem; font-size: 0.72rem;
+    padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: 600;
 }
-.badge-normal { background: #e6f9ef; color: #27ae60; }
-.badge-thin   { background: #fff9e6; color: #e67e22; }
-.badge-fat    { background: #fef0e6; color: #e67e22; }
-.badge-obese  { background: #fde8e8; color: #e74c3c; }
-
-/* Progress bar BMI */
-.bmi-progress-wrap { margin: 0.5rem 0 0.25rem; }
-.bmi-progress-track {
-    height: 8px; background: #eee; border-radius: 50px; overflow: hidden;
-}
-.bmi-progress-fill { height: 100%; border-radius: 50px; }
-.bmi-range-label { font-size: 0.72rem; color: #aaa; margin-top: 0.3rem; }
-
-/* TDEE card */
-.tdee-card {
-    border: 1.5px solid #dce8ff;
-    border-radius: 16px;
-    padding: 1rem 1.1rem;
-    margin: 0.85rem 0;
-    background: #f5f8ff;
-}
-.tdee-label { font-size: 0.7rem; font-weight: 700; color: #888; letter-spacing: .06em; text-transform: uppercase; }
-.tdee-val { font-size: 2rem; font-weight: 800; color: #1a1a1a; line-height: 1.15; }
-.tdee-unit { font-size: 0.85rem; color: #888; }
-.tdee-activity {
-    display: inline-block; margin-top: 0.5rem;
-    background: #e8eeff; color: #3a5bd9;
-    border-radius: 50px; font-size: 0.75rem; font-weight: 600;
-    padding: 0.2rem 0.75rem;
-}
-.tdee-goal-row {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 0.75rem; padding-top: 0.75rem;
-    border-top: 1px solid #dce8ff;
-}
-.tdee-goal-label { font-size: 0.8rem; color: #888; }
-.tdee-goal-val   { font-size: 0.9rem; font-weight: 700; color: #FF6B6B; }
-.tdee-goal-sub   { font-size: 0.72rem; color: #3a5bd9; font-weight: 600; }
-
-/* Stats grid (chiều cao, cân nặng, tuổi, giới tính) */
-.stats-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 0.6rem; margin-top: 0.5rem;
-}
-.stat-card {
-    background: #fafafa; border: 1.5px solid #f0f0f0;
-    border-radius: 14px; padding: 0.85rem 1rem; text-align: center;
-}
-.stat-icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
-.stat-val  { font-size: 1.4rem; font-weight: 800; color: #1a1a1a; line-height: 1; }
-.stat-unit { font-size: 0.72rem; color: #aaa; margin-top: 0.15rem; }
-
-/* AI suggest box */
+.tag-normal { background: #eafaf1; color: #27ae60; }
+.tag-thin   { background: #fff9e6; color: #e67e22; }
+.tag-fat    { background: #fef0e6; color: #e67e22; }
+.tag-obese  { background: #fde8e8; color: #e74c3c; }
 .ai-suggest {
     background: #fff8ee; border: 1.5px solid #f39c12; border-radius: 16px;
     padding: 1rem 1.1rem; margin: 0.75rem 0; display: flex; align-items: center; gap: 0.75rem;
 }
-.suggest-main { font-size: 1.1rem; font-weight: 800; color: #1a1a1a; }
-.suggest-sub  { font-size: 0.78rem; color: #888; margin-top: 0.1rem; }
-.suggest-hint { font-size: 0.72rem; color: #f39c12; margin-top: 0.25rem; }
-
-/* Dish cards */
+.ai-suggest .suggest-main { font-size: 1.1rem; font-weight: 800; color: #1a1a1a; }
+.ai-suggest .suggest-sub  { font-size: 0.78rem; color: #888; margin-top: 0.1rem; }
+.ai-suggest .suggest-hint { font-size: 0.72rem; color: #f39c12; margin-top: 0.25rem; }
 .meal-header {
     font-size: 1rem; font-weight: 700; color: #1a1a1a;
     margin: 1rem 0 0.5rem; display: flex; align-items: center; gap: 0.4rem;
@@ -162,16 +126,15 @@ section[data-testid="stSidebar"] { background: #fff; }
 }
 .dish-card img { width: 100%; height: 140px; object-fit: cover; }
 .dish-body { padding: 0.85rem; }
-.dish-name  { font-size: 0.92rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.2rem; }
-.dish-type  { font-size: 0.75rem; color: #999; margin-bottom: 0.6rem; }
+.dish-name { font-size: 0.92rem; font-weight: 700; color: #1a1a1a; margin-bottom: 0.2rem; }
+.dish-type { font-size: 0.75rem; color: #999; margin-bottom: 0.6rem; }
 .dish-macros { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.macro-pill  { font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: 600; }
+.macro-pill { font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 50px; font-weight: 600; }
 .macro-calo  { background: #fde8e8; color: #c0392b; }
 .macro-pro   { background: #e8f4fd; color: #2980b9; }
 .macro-fat   { background: #fff9e6; color: #d35400; }
 .macro-fiber { background: #eafaf1; color: #27ae60; }
 .score-dot   { font-size: 0.72rem; color: #aaa; margin-top: 0.5rem; }
-
 footer, #MainMenu { visibility: hidden; }
 [data-testid="stToolbar"] { display: none; }
 </style>
@@ -183,13 +146,12 @@ if "profile_done" not in st.session_state:
 if "profile" not in st.session_state:
     st.session_state.profile = {}
 
-# ── BMI logic (WHO Asia-Pacific, 5 mức) ──────────────────────────────────────
+# ── BMI logic (WHO Asia-Pacific) ──────────────────────────────────────────────
 BMI_RANGES = [
-    (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "thin",   "🔴"),
-    (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "thin",   "🟡"),
-    (18.5, 23.0, "Bình thường",           ["Giảm cân", "Duy trì", "Tăng cân"], "normal", "🟢"),
-    (23.0, 25.0, "Thừa cân",             ["Giảm cân", "Duy trì"],             "fat",    "🟠"),
-    (25.0, 999,  "Béo phì",              ["Giảm cân"],                        "obese",  "🔴"),
+    (0,    18.5, "Thiếu cân",   ["Tăng cân"],                        "thin",   "🟡"),
+    (18.5, 23.0, "Bình thường", ["Giảm cân", "Duy trì", "Tăng cân"], "normal", "🟢"),
+    (23.0, 27.5, "Thừa cân",    ["Giảm cân", "Duy trì"],             "fat",    "🟠"),
+    (27.5, 999,  "Béo phì",     ["Giảm cân"],                        "obese",  "🔴"),
 ]
 
 def bmi_info(bmi):
@@ -197,13 +159,6 @@ def bmi_info(bmi):
         if lo <= bmi < hi:
             return label, goals, css, icon
     return "Béo phì", ["Giảm cân"], "obese", "🔴"
-
-def bmi_progress(bmi):
-    """Tính % thanh progress (clamp 10–90%) và màu fill."""
-    pct = max(10, min(90, (bmi - 14) / (32 - 14) * 100))
-    colors = {"normal": "#2ecc71", "thin": "#f39c12", "fat": "#e67e22", "obese": "#e74c3c"}
-    _, _, css, _ = bmi_info(bmi)
-    return pct, colors.get(css, "#aaa")
 
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà/Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
@@ -228,7 +183,7 @@ if not st.session_state.profile_done:
         height = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=250.0, value=165.0, step=0.5)
         weight = st.number_input("Cân nặng (kg)",  min_value=30.0,  max_value=200.0, value=60.0,  step=0.5)
     with col2:
-        age      = st.number_input("Tuổi", min_value=10, max_value=100, value=22)
+        age      = st.number_input("Tuổi", min_value=20, max_value=49, value=22, help="Hỗ trợ độ tuổi 20–49")
         activity = st.selectbox("Mức độ vận động",
                       ["Ít vận động", "Vận động nhẹ", "Vận động vừa", "Vận động nhiều"])
 
@@ -287,83 +242,35 @@ else:
             st.session_state.profile_done = False
             st.rerun()
 
-    # ── Chỉ số sức khoẻ (style như ảnh) ─────────────────────────────────────
+    # ── Chỉ số sức khoẻ ──────────────────────────────────────────────────────
     bmi  = calc_bmi(p["weight"], p["height"])
     bmr  = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
     tdee = calc_tdee(bmr, p["activity"])
     bmi_class, _, bmi_css, _ = bmi_info(bmi)
-    bmi_pct, bmi_color = bmi_progress(bmi)
 
-    # chuẩn range hiển thị theo bmi_css
-    range_label_map = {
-        "thin":   "Phạm vi chuẩn: 18.5 – 22.9",
-        "normal": "Phạm vi chuẩn: 18.5 – 22.9",
-        "fat":    "Phạm vi chuẩn: 18.5 – 22.9",
-        "obese":  "Phạm vi chuẩn: 18.5 – 22.9",
+    tag_map = {
+        "normal": ("Bình thường", "tag-normal"),
+        "thin":   ("Thiếu cân",   "tag-thin"),
+        "fat":    ("Thừa cân",    "tag-fat"),
+        "obese":  ("Béo phì",     "tag-obese"),
     }
-
-    tdee_adj_preview = adjust_tdee(tdee, p["goal"], p["gender"])
-    delta_map = {
-        "Giảm cân": f"= Giảm {tdee - tdee_adj_preview:.0f} calo so với TDEE",
-        "Tăng cân": f"= Tăng {tdee_adj_preview - tdee:.0f} calo so với TDEE",
-        "Duy trì":  "= Duy trì cân nặng",
-    }
-    gender_icon = "♂️" if p["gender"] == "Nam" else "♀️"
+    tag_label, tag_css = tag_map[bmi_css]
 
     st.markdown(f"""
-<div class="health-page">
-    <div class="health-page-title">Chỉ Số Sức Khỏe</div>
-
-    <!-- BMI hero -->
-    <div class="bmi-hero">
-        <div class="bmi-big">{bmi:.1f}</div>
-        <div><span class="bmi-badge badge-{bmi_css}">{bmi_class}</span></div>
-        <div class="bmi-progress-wrap">
-            <div class="bmi-progress-track">
-                <div class="bmi-progress-fill" style="width:{bmi_pct:.0f}%;background:{bmi_color}"></div>
-            </div>
-            <div class="bmi-range-label">Phạm vi chuẩn: 18.5 – 22.9</div>
+<div class="health-card">
+    <div class="section-title">🧠 Chỉ số sức khoẻ của bạn</div>
+    <div class="health-row">
+        <div class="health-metric">
+            <div class="metric-val">{bmi:.1f}</div>
+            <div class="metric-unit">kg/m²</div>
+            <div class="metric-label">BMI</div>
+            <span class="metric-tag {tag_css}">{tag_label}</span>
         </div>
-    </div>
-
-    <!-- TDEE card -->
-    <div class="tdee-card">
-        <div class="tdee-label">🔥 TDEE (Tổng năng lượng tiêu hao)</div>
-        <div style="margin-top:0.3rem">
-            <span class="tdee-val">{tdee:,.0f}</span>
-            <span class="tdee-unit"> Calo/ngày</span>
-        </div>
-        <div><span class="tdee-activity">Mức vận động: {p['activity']}</span></div>
-        <div class="tdee-goal-row">
-            <span class="tdee-goal-label">Mục tiêu của bạn:</span>
-            <div style="text-align:right">
-                <div class="tdee-goal-val">{tdee_adj_preview:,.0f} Calo</div>
-                <div class="tdee-goal-sub">{delta_map[p['goal']]}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats grid -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">📏</div>
-            <div class="stat-val">{p['height']:.0f}</div>
-            <div class="stat-unit">Chiều cao (cm)</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">⚖️</div>
-            <div class="stat-val">{p['weight']:.0f}</div>
-            <div class="stat-unit">Cân nặng (kg)</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">🎂</div>
-            <div class="stat-val">{p['age']}</div>
-            <div class="stat-unit">Tuổi</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">{gender_icon}</div>
-            <div class="stat-val" style="font-size:1rem;margin-top:0.2rem">{p['gender']}</div>
-            <div class="stat-unit">Giới tính</div>
+        <div class="health-metric">
+            <div class="metric-val">{tdee:,.0f}</div>
+            <div class="metric-unit">Calo/ngày</div>
+            <div class="metric-label">TDEE</div>
+            <span class="metric-tag tag-normal">Duy trì cân nặng</span>
         </div>
     </div>
 </div>
@@ -393,21 +300,28 @@ else:
 
     if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
 
+        # ── Tầng 2 ────────────────────────────────────────────────────────
         tdee_adj  = adjust_tdee(tdee, p["goal"], p["gender"])
         has_snack = snack_mode != "Không có"
         targets   = calc_meal_targets(tdee_adj, p["goal"], has_snack)
 
+        delta_map = {
+            "Giảm cân": f"Giảm {tdee - tdee_adj:.0f} calo so với TDEE",
+            "Tăng cân": f"Tăng {tdee_adj - tdee:.0f} calo so với TDEE",
+            "Duy trì":  "Duy trì cân nặng hiện tại",
+        }
         st.markdown(f"""
 <div class="ai-suggest">
     <div style="font-size:1.5rem">💡</div>
     <div>
         <div class="suggest-main">{tdee_adj:,.0f} Calo/ngày</div>
-        <div class="suggest-sub">{delta_map[p['goal']].replace('= ','')}</div>
+        <div class="suggest-sub">{delta_map[p['goal']]}</div>
         <div class="suggest-hint">✨ Gợi ý từ AI dựa trên hồ sơ của bạn</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
+        # ── Tầng 3 ────────────────────────────────────────────────────────
         with st.spinner("Đang tìm món phù hợp..."):
             suggestions = recommend_day(
                 meal_targets=targets,
