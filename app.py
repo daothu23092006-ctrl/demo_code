@@ -137,25 +137,77 @@ else:
         "Duy trì":  "Giữ nguyên TDEE",
     }
 
-    st.markdown("#### 🧠 Chỉ số sức khoẻ")
-
-    c1, c2 = st.columns(2)
-    with c1:
-        st.metric("BMI", f"{bmi:.1f}", bmi_class)
-        bmi_pct = max(0.0, min(1.0, (bmi - 14) / (32 - 14)))
-        st.progress(bmi_pct)
-        st.caption("Chuẩn châu Á: 18.5 – 22.9")
-    with c2:
-        st.metric("🔥 TDEE", f"{tdee:,.0f} kcal", f"Mục tiêu: {tdee_adj_preview:,.0f} kcal")
-        st.caption(f"Mức vận động: {p['activity']}")
-        st.caption(delta_map[p["goal"]])
-
-    s1, s2, s3, s4 = st.columns(4)
+    # màu badge BMI
+    badge_cfg = {
+        "Bình thường":           ("#e6f9ef", "#27ae60"),
+        "Thiếu cân nhẹ":         ("#fff9e6", "#e67e22"),
+        "Thiếu cân (vừa/nặng)":  ("#fde8e8", "#e74c3c"),
+        "Thừa cân":              ("#fef0e6", "#e67e22"),
+        "Béo phì":               ("#fde8e8", "#e74c3c"),
+    }
+    badge_bg, badge_color = badge_cfg.get(bmi_class, ("#eee", "#555"))
+    bmi_pct = int(max(0, min(100, (bmi - 14) / (32 - 14) * 100)))
+    bar_color = badge_color
     gender_icon = "♂️" if p["gender"] == "Nam" else "♀️"
-    s1.metric("📏", f"{p['height']:.0f} cm", "Chiều cao")
-    s2.metric("⚖️", f"{p['weight']:.0f} kg", "Cân nặng")
-    s3.metric("🎂", f"{p['age']}", "Tuổi")
-    s4.metric(f"{gender_icon}", p["gender"], "Giới tính")
+    delta_label = {
+        "Giảm cân": f"−{tdee - tdee_adj_preview:.0f} kcal so với TDEE",
+        "Tăng cân": f"+{tdee_adj_preview - tdee:.0f} kcal so với TDEE",
+        "Duy trì":  "= Giữ nguyên TDEE",
+    }[p["goal"]]
+
+    st.markdown(f"""
+<div style="background:#fff;border-radius:20px;padding:1.25rem;margin-bottom:1rem;box-shadow:0 2px 10px rgba(0,0,0,0.06)">
+  <div style="font-size:0.95rem;font-weight:700;color:#1a1a1a;margin-bottom:1rem">🧠 Chỉ số sức khoẻ</div>
+
+  <!-- Row 1: BMI + TDEE -->
+  <div style="display:flex;gap:0.75rem;margin-bottom:0.75rem">
+
+    <!-- BMI -->
+    <div style="flex:1;background:#fafafa;border:1.5px solid #f0f0f0;border-radius:16px;padding:1rem">
+      <div style="font-size:0.7rem;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.05em">BMI</div>
+      <div style="font-size:2rem;font-weight:800;color:#1a1a1a;line-height:1.1">{bmi:.1f}</div>
+      <span style="display:inline-block;margin-top:0.3rem;padding:0.2rem 0.7rem;border-radius:50px;font-size:0.75rem;font-weight:700;background:{badge_bg};color:{badge_color}">{bmi_class}</span>
+      <div style="margin-top:0.6rem;height:6px;background:#eee;border-radius:50px;overflow:hidden">
+        <div style="width:{bmi_pct}%;height:100%;background:{bar_color};border-radius:50px"></div>
+      </div>
+      <div style="font-size:0.7rem;color:#bbb;margin-top:0.3rem">Chuẩn: 18.5 – 22.9</div>
+    </div>
+
+    <!-- TDEE -->
+    <div style="flex:1;background:#f5f8ff;border:1.5px solid #dce8ff;border-radius:16px;padding:1rem">
+      <div style="font-size:0.7rem;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.05em">🔥 TDEE</div>
+      <div style="font-size:1.6rem;font-weight:800;color:#1a1a1a;line-height:1.2">{tdee:,.0f} <span style="font-size:0.85rem;font-weight:400;color:#aaa">kcal</span></div>
+      <div style="font-size:0.75rem;color:#3a5bd9;margin-top:0.3rem">Mục tiêu: <b>{tdee_adj_preview:,.0f} kcal</b></div>
+      <div style="font-size:0.72rem;color:#aaa;margin-top:0.2rem">{p['activity']}</div>
+      <div style="font-size:0.72rem;color:#aaa;margin-top:0.15rem">{delta_label}</div>
+    </div>
+  </div>
+
+  <!-- Row 2: 4 stats -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.5rem">
+    <div style="background:#fafafa;border:1.5px solid #f0f0f0;border-radius:14px;padding:0.7rem;text-align:center">
+      <div style="font-size:1.1rem">📏</div>
+      <div style="font-size:1.1rem;font-weight:800;color:#1a1a1a">{p['height']:.0f}</div>
+      <div style="font-size:0.65rem;color:#aaa;margin-top:0.1rem">Chiều cao</div>
+    </div>
+    <div style="background:#fafafa;border:1.5px solid #f0f0f0;border-radius:14px;padding:0.7rem;text-align:center">
+      <div style="font-size:1.1rem">⚖️</div>
+      <div style="font-size:1.1rem;font-weight:800;color:#1a1a1a">{p['weight']:.0f}</div>
+      <div style="font-size:0.65rem;color:#aaa;margin-top:0.1rem">Cân nặng</div>
+    </div>
+    <div style="background:#fafafa;border:1.5px solid #f0f0f0;border-radius:14px;padding:0.7rem;text-align:center">
+      <div style="font-size:1.1rem">🎂</div>
+      <div style="font-size:1.1rem;font-weight:800;color:#1a1a1a">{p['age']}</div>
+      <div style="font-size:0.65rem;color:#aaa;margin-top:0.1rem">Tuổi</div>
+    </div>
+    <div style="background:#fafafa;border:1.5px solid #f0f0f0;border-radius:14px;padding:0.7rem;text-align:center">
+      <div style="font-size:1.1rem">{gender_icon}</div>
+      <div style="font-size:1rem;font-weight:800;color:#1a1a1a">{p['gender']}</div>
+      <div style="font-size:0.65rem;color:#aaa;margin-top:0.1rem">Giới tính</div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
     st.divider()
 
