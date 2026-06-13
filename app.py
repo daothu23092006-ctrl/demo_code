@@ -148,10 +148,11 @@ if "profile" not in st.session_state:
 
 # ── BMI logic (WHO Asia-Pacific) ──────────────────────────────────────────────
 BMI_RANGES = [
-    (0,    18.5, "Thiếu cân",   ["Tăng cân"],                        "thin",   "🟡"),
-    (18.5, 23.0, "Bình thường", ["Giảm cân", "Duy trì", "Tăng cân"], "normal", "🟢"),
-    (23.0, 27.5, "Thừa cân",    ["Giảm cân", "Duy trì"],             "fat",    "🟠"),
-    (27.5, 999,  "Béo phì",     ["Giảm cân"],                        "obese",  "🔴"),
+    (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "thin",   "🔴"),
+    (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "thin",   "🟡"),
+    (18.5, 23.0, "Bình thường",           ["Giảm cân", "Duy trì", "Tăng cân"], "normal", "🟢"),
+    (23.0, 25.0, "Thừa cân",             ["Giảm cân", "Duy trì"],             "fat",    "🟠"),
+    (25.0, 999,  "Béo phì",              ["Giảm cân"],                        "obese",  "🔴"),
 ]
 
 def bmi_info(bmi):
