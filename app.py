@@ -51,12 +51,8 @@ ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà/Vịt", "Cá", "Hải sản", "Trứng
 VEGAN_SOURCES = ["Đạm thực vật"]
 
 # ── Header ────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div style="text-align:center;padding:1rem 0 0.5rem">
-    <div style="font-size:1.5rem;font-weight:800;color:#1a1a1a">🍚 Hôm nay ăn gì?</div>
-    <div style="font-size:0.82rem;color:#999;margin-top:0.2rem">Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng</div>
-</div>
-""", unsafe_allow_html=True)
+st.title("🍚 Hôm nay ăn gì?")
+st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
 
 # ══════════════════════════════════════════════════════════════════════════════
