@@ -1,16 +1,12 @@
-# app.py — Streamlit UI cho hệ thống gợi ý thực đơn
-# Dựa sát theo pipeline gốc (PIPELINE_.docx)
-
+# Nạp thư viện streamlit 
 import streamlit as st
+# Nạp hàm gợi ý thực đơn từ recommender.py
 from recommender import recommend_day
 
-# ── Cấu hình trang ───────────────────────────────────────────────────────────
-st.set_page_config(
-    page_title="Hôm nay ăn gì?",
-    page_icon="👩‍🍳",
-    layout="centered",
-)
+# Tiêu đề và biểu tượng cho app
+st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layout="centered")
 
+# Phần CSS tuỳ chỉnh để làm đẹp giao diện
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f0f2f5; }
@@ -56,15 +52,16 @@ footer, #MainMenu { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Hằng số ───────────────────────────────────────────────────────────────────
+# Hằng số 
 ACTIVITY_FACTORS = {
-    "Ít vận động":    1.200,
-    "Vận động nhẹ":   1.375,
-    "Vận động vừa":   1.550,
+    "Ít vận động": 1.200,
+    "Vận động nhẹ": 1.375,
+    "Vận động vừa": 1.550,
     "Vận động nhiều": 1.725,
 }
 
-# FIX #1: 5 mức BMI theo pipeline gốc (châu Á), không phải 3 mức
+# BMI logic (ràng buộc BMI caculated)
+# Bảng định nghĩa 5 mức BMI theo chuẩn châu Á, kèm nhãn, mục tiêu phù hợp và biểu tượng cảm xúc
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
     (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
@@ -89,7 +86,7 @@ MEAL_RATIO = {
     ("Tăng cân", True):  {"Sáng": 0.20, "Trưa": 0.30, "Tối": 0.35, "Phụ": 0.15},
 }
 
-# FIX #6: định nghĩa delta_map ở đây, trước khi dùng
+# Định nghĩa delta_map ở đây, trước khi dùng
 DELTA_MAP = {
     "Giảm cân": "giảm cân lành mạnh",
     "Duy trì":  "duy trì cân nặng",
@@ -97,12 +94,12 @@ DELTA_MAP = {
 }
 
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà/Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
-VEGAN_SOURCES       = ["Đạm thực vật"]
+VEGAN_SOURCES = ["Đạm thực vật"]
 
 MEAL_ICONS = {"Sáng": "🌄", "Trưa": "☀️", "Tối": "🌙", "Phụ": "🍎"}
 
 
-# ── Hàm tính toán (Tầng 1 + 2) ───────────────────────────────────────────────
+# Hàm tính toán (Tầng 1 + 2)
 def calc_bmi(weight, height_cm):
     return weight / (height_cm / 100) ** 2
 
@@ -155,14 +152,14 @@ def delta_label(tdee, tdee_final, goal):
     return "Giữ nguyên TDEE"
 
 
-# ── Session state ─────────────────────────────────────────────────────────────
+# Session state để lưu hồ sơ người dùng và tránh load lại nhiều lần
 if "profile_done" not in st.session_state:
     st.session_state.profile_done = False
 if "profile" not in st.session_state:
     st.session_state.profile = {}
 
 
-# ── Header ────────────────────────────────────────────────────────────────────
+# Header của app 
 st.title("👩‍🍳🍜 Hôm nay ăn gì?")
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
@@ -173,22 +170,21 @@ st.divider()
 # ══════════════════════════════════════════════════════════════════════════════
 if not st.session_state.profile_done:
     st.markdown("#### 📋 Hồ sơ sức khoẻ")
-    st.caption("Nhập một lần — hệ thống tự tính toán cho bạn.")
+    st.caption("Nhập thông tin sức khoẻ của bạn để nhận gợi ý thực đơn phù hợp.")
 
     col1, col2 = st.columns(2)
     with col1:
         height = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=250.0,
                                   value=165.0, step=0.5)
-        weight = st.number_input("Cân nặng (kg)",  min_value=30.0,  max_value=200.0,
+        weight = st.number_input("Cân nặng (kg)", min_value=30.0,  max_value=200.0,
                                   value=60.0, step=0.5)
     with col2:
-        age      = st.number_input("Tuổi", min_value=10, max_value=100, value=22)
-        activity = st.selectbox("Mức độ vận động",
-                                list(ACTIVITY_FACTORS.keys()), index=1)
+        age = st.number_input("Tuổi", min_value=10, max_value=100, value=22)
+        activity = st.selectbox("Mức độ vận động", list(ACTIVITY_FACTORS.keys()), index=1)
 
     gender = st.radio("Giới tính", ["Nam", "Nữ"], horizontal=True)
 
-    # Tính BMI tạm để hiển thị mục tiêu được phép chọn
+    # Tính BMI tạm thời để hiển thị nhãn và mục tiêu phù hợp ngay khi nhập thông tin, giúp người dùng hiểu rõ hơn về tình trạng sức khoẻ của mình
     bmi_temp = calc_bmi(weight, height)
     bmi_class, allowed_goals, bmi_icon = get_bmi_info(bmi_temp)
     st.info(
@@ -209,19 +205,19 @@ if not st.session_state.profile_done:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# BƯỚC 2 — HÔM NAY ĂN GÌ (Tầng 1 mục 1.2 + Tầng 2 + Tầng 3)
+# BƯỚC 2 — HÔM NAY ĂN GÌ  
 # ══════════════════════════════════════════════════════════════════════════════
 else:
     p = st.session_state.profile
 
     # Tính chỉ số sức khoẻ
-    bmi         = calc_bmi(p["weight"], p["height"])
-    bmr         = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
-    tdee        = calc_tdee(bmr, p["activity"])
-    tdee_final  = adjust_tdee(tdee, p["goal"], p["gender"])
+    bmi = calc_bmi(p["weight"], p["height"])
+    bmr = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
+    tdee = calc_tdee(bmr, p["activity"])
+    tdee_final = adjust_tdee(tdee, p["goal"], p["gender"])
     bmi_class, _, bmi_icon = get_bmi_info(bmi)
 
-    # ── Sidebar: hồ sơ + chỉ số ──────────────────────────────────────────────
+    # Sidebar: hiển thị thông tin hồ sơ người dùng và chỉ số sức khoẻ cơ bản, có nút để quay lại chỉnh sửa.
     with st.sidebar:
         st.markdown("### 👤 Hồ sơ của bạn")
         st.markdown(f"""
@@ -245,19 +241,21 @@ else:
     # ── Card chỉ số sức khoẻ ─────────────────────────────────────────────────
     st.markdown("#### 🧠 Chỉ số sức khoẻ")
 
+    # badge màu theo BMI
     badge_cfg = {
-        "Bình thường":           ("#e6f9ef", "#27ae60"),
-        "Thiếu cân nhẹ":         ("#fff9e6", "#e67e22"),
-        "Thiếu cân (vừa/nặng)":  ("#fde8e8", "#e74c3c"),
-        "Thừa cân":              ("#fef0e6", "#e67e22"),
-        "Béo phì":               ("#fde8e8", "#e74c3c"),
+        "Bình thường": ("#e6f9ef", "#27ae60"),
+        "Thiếu cân nhẹ": ("#fff9e6", "#e67e22"),
+        "Thiếu cân (vừa/nặng)": ("#fde8e8", "#e74c3c"),
+        "Thừa cân": ("#fef0e6", "#e67e22"),
+        "Béo phì": ("#fde8e8", "#e74c3c"),
     }
     badge_bg, badge_color = badge_cfg.get(bmi_class, ("#eee", "#555"))
-    bmi_pct       = max(0, min(100, int((bmi - 14) / (32 - 14) * 100)))
-    gender_icon   = "♂️" if p["gender"] == "Nam" else "♀️"
-    # FIX #6: dùng hàm delta_label đã định nghĩa ở trên
+    bmi_pct = max(0, min(100, int((bmi - 14) / (32 - 14) * 100)))
+    gender_icon = "♂️" if p["gender"] == "Nam" else "♀️"
+    # Dùng hàm delta_label đã định nghĩa ở trên
     dl = delta_label(tdee, tdee_final, p["goal"])
 
+    # Row 1: 2 card hiển thị chỉ số BMI + TDEE
     col_bmi, col_tdee = st.columns(2)
     with col_bmi:
         st.markdown(f"""
@@ -288,14 +286,14 @@ else:
 </div>
 """, unsafe_allow_html=True)
 
-    # 4 card nhỏ: chiều cao, cân nặng, tuổi, giới tính
+    # Row 2: 4 card hiển thị thông tin cá nhân (chiều cao, cân nặng, tuổi, giới tính)
     st.write("")
     s1, s2, s3, s4 = st.columns(4)
     for col, icon, val, lbl in [
         (s1, "📏", f"{p['height']:.0f} cm", "Chiều cao"),
         (s2, "⚖️", f"{p['weight']:.0f} kg", "Cân nặng"),
-        (s3, "🎂", str(p["age"]),            "Tuổi"),
-        (s4, gender_icon, p["gender"],       "Giới tính"),
+        (s3, "🎂", str(p["age"]), "Tuổi"),
+        (s4, gender_icon, p["gender"], "Giới tính"),
     ]:
         with col:
             st.markdown(f"""
@@ -309,7 +307,7 @@ else:
 
     st.divider()
 
-    # ── Tùy chọn hôm nay (Tầng 1 mục 1.2) ───────────────────────────────────
+    # Tùy chọn gợi ý thực đơn trong ngày: chế độ ăn, nguồn đạm yêu thích, chế độ bữa trưa/tối, bữa phụ
     st.markdown("#### 🌅 Hôm nay ăn gì?")
 
     diet_type = st.radio("Chế độ ăn", ["Mặn", "Chay"], horizontal=True)
@@ -349,9 +347,9 @@ else:
 
     st.write("")
 
-    # ── Nút gợi ý ────────────────────────────────────────────────────────────
+    # Nút gợi ý thực đơn cho ngày hôm nay
     if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
-        has_snack    = snack_mode != "Không có"
+        has_snack = snack_mode != "Không có"
         meal_targets = calc_meal_targets(tdee_final, p["goal"], has_snack)
 
         st.success(
@@ -361,17 +359,17 @@ else:
 
         with st.spinner("Đang tìm món phù hợp..."):
             suggestions = recommend_day(
-                meal_targets    = meal_targets,
-                diet_type       = diet_type,
+                meal_targets = meal_targets,
+                diet_type = diet_type,
                 preferred_sources = preferred_sources,
-                snack_label     = snack_mode,
-                lunch_mode      = lunch_mode,
-                dinner_mode     = dinner_mode,
+                snack_label = snack_mode,
+                lunch_mode = lunch_mode,
+                dinner_mode = dinner_mode,
             )
 
         st.divider()
 
-        # ── Hiển thị kết quả từng bữa (Tầng 4) ──────────────────────────────
+        # Hiển thị kết quả từng bữa 
         def score_color(s):
             if s >= 0.75: return "#2ecc71"
             if s >= 0.55: return "#f39c12"
@@ -409,7 +407,7 @@ else:
 """, unsafe_allow_html=True)
 
         for meal_id, target in meal_targets.items():
-            icon   = MEAL_ICONS.get(meal_id, "🍽️")
+            icon = MEAL_ICONS.get(meal_id, "🍽️")
             result = suggestions.get(meal_id)
 
             st.markdown(
@@ -427,9 +425,9 @@ else:
             if isinstance(result, dict):
                 for sub_key, label in [
                     ("protein", "Món chính"),
-                    ("soup",    "Món canh"),
-                    ("veggie",  "Món phụ / Rau"),
-                    ("rice",    "Cơm"),
+                    ("soup", "Món canh"),
+                    ("veggie", "Món phụ / Rau"),
+                    ("rice", "Cơm"),
                 ]:
                     dishes = result.get(sub_key, [])
                     if dishes:
@@ -443,18 +441,17 @@ else:
 
             st.write("")
 
-        # Debug expander
         with st.expander("🔧 Debug — meal_targets & filters"):
             st.json({
-                "tdee_raw":   round(tdee, 1),
+                "tdee_raw": round(tdee, 1),
                 "tdee_final": round(tdee_final, 1),
                 "meal_targets": meal_targets,
                 "filters": {
-                    "diet_type":         diet_type,
+                    "diet_type": diet_type,
                     "preferred_sources": preferred_sources,
-                    "snack_label":       snack_mode,
-                    "lunch_mode":        lunch_mode,
-                    "dinner_mode":       dinner_mode,
+                    "snack_label": snack_mode,
+                    "lunch_mode": lunch_mode,
+                    "dinner_mode": dinner_mode,
                 },
             })
 
