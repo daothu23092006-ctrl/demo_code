@@ -10,9 +10,9 @@ st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="🍚", layout="cen
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f0f2f5; }
-[data-testid="stMain"] > div { padding-top: 1rem; }
+[data-testid="stMain"] > div { padding-top: 0 !important; }
 section[data-testid="stSidebar"] { background: #fff; }
-.block-container { max-width: 480px !important; padding: 0 1rem 2rem !important; margin: 0 auto !important; }
+.block-container { max-width: 480px !important; padding: 2rem 1rem 2rem !important; margin: 0 auto !important; }
 [data-testid="stRadio"] > div { flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5rem !important; }
 [data-testid="stRadio"] label { border-radius: 50px !important; border: 1.5px solid #e8e8e8 !important; padding: 0.4rem 1rem !important; font-size: 0.85rem !important; font-weight: 500 !important; color: #555 !important; background: #fafafa !important; cursor: pointer !important; }
 [data-testid="stRadio"] label:has(input:checked) { background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }
