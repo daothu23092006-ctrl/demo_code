@@ -33,12 +33,30 @@ def calc_bmi(weight_kg, height_cm):
 
 
 def bmi_label(bmi):
-    if bmi < 18.5:
-        return "Thiếu cân", ["Tăng cân", "Duy trì"]
-    elif bmi < 23:
-        return "Bình thường", ["Giảm cân", "Duy trì", "Tăng cân"]
-    else:
-        return "Thừa cân", ["Giảm cân", "Duy trì"]
+    """
+    Phân loại BMI theo chuẩn châu Á và trả về danh sách mục tiêu tương ứng.
+    """
+    if bmi < 17.0:
+        bmi_class = "Thiếu cân (Vừa/Nặng)"
+        allowed_goals = ["Tăng cân"]
+        
+    elif 17.0 <= bmi < 18.5:
+        bmi_class = "Thiếu cân nhẹ"
+        allowed_goals = ["Tăng cân", "Duy trì"]
+        
+    elif 18.5 <= bmi < 23.0:
+        bmi_class = "Bình thường"
+        allowed_goals = ["Giảm cân", "Duy trì", "Tăng cân"]
+        
+    elif 23.0 <= bmi < 25.0:
+        bmi_class = "Thừa cân"
+        allowed_goals = ["Giảm cân", "Duy trì"]
+        
+    else: # bmi >= 25.0
+        bmi_class = "Béo phì"
+        allowed_goals = ["Giảm cân"]
+        
+    return bmi_class, allowed_goals
 
 
 def calc_bmr(weight_kg, height_cm, age, gender):
