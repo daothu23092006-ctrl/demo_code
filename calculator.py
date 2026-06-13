@@ -52,7 +52,7 @@ def bmi_label(bmi):
         bmi_class = "Thừa cân"
         allowed_goals = ["Giảm cân", "Duy trì"]
         
-    else: # bmi >= 25.0
+    elif bmi >= 25.0:
         bmi_class = "Béo phì"
         allowed_goals = ["Giảm cân"]
         
