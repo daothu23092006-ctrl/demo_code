@@ -15,7 +15,7 @@ if "profile" not in st.session_state:
     st.session_state.profile = {}
 
 # ── Header ────────────────────────────────────────────────────────────────────
-st.title("🍚 Gợi ý thực đơn hàng ngày")
+st.title("🍚 Hôm nay ăn gì?")
 st.caption("Tính toán dinh dưỡng và gợi ý thực đơn phù hợp mục tiêu cá nhân")
 st.divider()
 
@@ -28,7 +28,7 @@ if not st.session_state.profile_done:
 
     col1, col2 = st.columns(2)
     with col1:
-        age    = st.number_input("Tuổi", min_value=10, max_value=100, value=22)
+        age    = st.number_input("Tuổi", min_value=20, max_value=49, value=22)
         weight = st.number_input("Cân nặng (kg)", min_value=30.0, max_value=200.0, value=60.0, step=0.5)
         gender = st.radio("Giới tính", ["Nam", "Nữ"], horizontal=True)
     with col2:
