@@ -25,8 +25,8 @@ section[data-testid="stSidebar"] { background: #fff; }
 [data-testid="stMultiSelect"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 [data-testid="stNumberInput"] input { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 /* Label to đậm cho number input và selectbox */
-[data-testid="stNumberInput"] label,
-[data-testid="stSelectbox"] label {
+[data-testid="stNumberInput"] > label,
+[data-testid="stSelectbox"] > label {
     font-size: 1rem !important;
     font-weight: 700 !important;
     color: #1a1a1a !important;
