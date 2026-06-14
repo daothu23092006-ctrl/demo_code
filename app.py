@@ -49,6 +49,8 @@ if "profile_done" not in st.session_state:
     st.session_state.profile_done = False
 if "profile" not in st.session_state:
     st.session_state.profile = {}
+if "show_suggestions" not in st.session_state:
+    st.session_state.show_suggestions = False
 
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
@@ -224,12 +226,11 @@ else:
         st.markdown('<span class="field-label">💪 Nguồn đạm yêu thích</span>', unsafe_allow_html=True)
         preferred_sources = st.multiselect(
             "", ALL_PROTEIN_SOURCES, default=["Gà", "Cá"],
-            placeholder="Bạn hãy chọn ít nhất một nguồn đạm yêu thích",
-            key="protein_multi",
-            label_visibility="collapsed"
+            placeholder="Bạn hãy chọn ít nhất một nguồn đạm...",
+            key="protein_multi"
         )
         if not preferred_sources:
-            st.warning("Chưa chọn nguồn đạm - hệ thống sẽ gợi ý tất cả các loại.")
+            st.warning("Chưa chọn nguồn đạm — hệ thống sẽ gợi ý tất cả các loại.")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -244,6 +245,9 @@ else:
 
     st.write("")
     if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
+        st.session_state.show_suggestions = True
+
+    if st.session_state.show_suggestions:
         tdee_adj  = adjust_tdee(tdee, p["goal"], p["gender"])
         has_snack = snack_mode != "Không có"
         targets   = calc_meal_targets(tdee_adj, p["goal"], has_snack)
@@ -316,3 +320,7 @@ else:
                     "dinner_mode": dinner_mode,
                 },
             })
+
+        st.write("")
+        if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
+            st.rerun()
