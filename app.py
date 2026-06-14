@@ -111,9 +111,6 @@ if not st.session_state.profile_done:
             "gender": gender, "activity": activity, "goal": goal,
         }
         st.session_state.profile_done = True
-        #
-        st.session_state.current_step = "step_filter"
-        st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # BƯỚC 2 - HÔM NAY ĂN GÌ
