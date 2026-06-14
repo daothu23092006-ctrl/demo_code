@@ -10,16 +10,31 @@ from recommender import recommend_day
 
 st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layout="centered")
 
+# ══════════════════════════════════════════════════════════════════════════════
+# PHẦN GIAO DIỆN VÀ CSS TỐI ƯU HÓA (XÓA KHOẢNG TRẮNG ĐẦU TRANG)
+# ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f0f2f5; }
+
+/* 1. Triệt tiêu tận gốc khoảng trống chạy ngầm của thanh Header Streamlit */
 [data-testid="stHeader"] {
     display: none !important;
     height: 0px !important;
 }
-[data-testid="stMain"] > div { padding-top: 2rem !important; }
+
+/* 2. Ép nội dung chính lên sát mép trên một cách tinh tế */
+[data-testid="stMain"] > div { padding-top: 1.5rem !important; }
 section[data-testid="stSidebar"] { background: #fff; }
-.block-container { max-width: 480px !important; padding: 2rem 1rem 2rem !important; margin: 0 auto !important; }
+.block-container { max-width: 480px !important; padding: 0rem 1rem 2rem !important; margin: 0 auto !important; }
+
+/* Triệt tiêu lề thừa của thẻ tiêu đề chính h1 */
+h1 {
+    margin-top: 0rem !important;
+    padding-top: 0rem !important;
+}
+
+/* 3. Style các thành phần giao diện khác */
 [data-testid="stRadio"] > div { flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5rem !important; }
 [data-testid="stRadio"] label { border-radius: 50px !important; border: 1.5px solid #e8e8e8 !important; padding: 0.4rem 1rem !important; font-size: 0.85rem !important; font-weight: 500 !important; color: #555 !important; background: #fafafa !important; cursor: pointer !important; }
 [data-testid="stRadio"] label:has(input:checked) { background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }
@@ -28,6 +43,7 @@ section[data-testid="stSidebar"] { background: #fff; }
 [data-testid="stSelectbox"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 [data-testid="stMultiSelect"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 [data-testid="stNumberInput"] input { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
+
 /* Label to đậm cho number input và selectbox */
 [data-testid="stNumberInput"] label,
 [data-testid="stSelectbox"] label {
@@ -49,13 +65,13 @@ footer, #MainMenu { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-# 🛠️ CHỈNH SỬA VỊ TRÍ 1: Thêm biến quản lý các trang (step) vào session_state
+# ══════════════════════════════════════════════════════════════════════════════
+# KHỞI TẠO CÁC BIẾN TRẠNG THÁI (SESSION STATE)
+# ══════════════════════════════════════════════════════════════════════════════
 if "profile_done" not in st.session_state:
     st.session_state.profile_done = False
 if "profile" not in st.session_state:
     st.session_state.profile = {}
-if "show_suggestions" not in st.session_state:
-    st.session_state.show_suggestions = False
 if "current_step" not in st.session_state:
     st.session_state.current_step = "step_profile"
 
@@ -76,13 +92,14 @@ def bmi_info(bmi):
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
+# Tiêu đề giao diện được kéo sát lên nóc gọn gàng
 st.title("👩‍🍳🍜 Hôm nay ăn gì?")
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# BƯỚC 1 - HỒ SƠ NGƯỜI DÙNG
+# BƯỚC 1 - HỒ SƠ NGƯỜI DÙNG (STEP: step_profile)
 # ══════════════════════════════════════════════════════════════════════════════
 if not st.session_state.profile_done:
     st.markdown("#### 📋 Hồ sơ sức khoẻ")
@@ -108,22 +125,22 @@ if not st.session_state.profile_done:
     goal = st.radio("", allowed_goals, horizontal=True, key="goal_radio", label_visibility="collapsed")
     st.write("")
 
-    # 🛠️ CHỈNH SỬA VỊ TRÍ 2: Cập nhật current_step khi lưu hồ sơ xong để đẩy sang trang lọc món
     if st.button("Lưu hồ sơ", use_container_width=True, type="primary"):
         st.session_state.profile = {
             "age": age, "weight": weight, "height": height,
             "gender": gender, "activity": activity, "goal": goal,
         }
         st.session_state.profile_done = True
-        st.session_state.current_step = "step_filter"
+        st.session_state.current_step = "step_filter"  # Đẩy trạng thái sang bước chọn món ăn
         st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PHẦN XỬ LÝ SAU KHI ĐÃ CÓ HỒ SƠ
+# PHẦN XỬ LÝ SAU KHI ĐÃ CÓ HỒ SƠ (ĐIỀU HƯỚNG TRANG 2 VÀ TRANG 3)
 # ══════════════════════════════════════════════════════════════════════════════
 else:
     p = st.session_state.profile
 
+    # THANH SIDEBAR DÙNG CHUNG ĐỂ THEO DÕI HỒ SƠ
     with st.sidebar:
         st.markdown("### 👤 Hồ sơ của bạn")
         st.markdown(f"""
@@ -150,6 +167,7 @@ else:
             st.session_state.current_step = "step_profile"
             st.rerun()
 
+    # Tính toán sẵn các chỉ số cơ bản phục vụ cho cả 2 trang
     bmi  = calc_bmi(p["weight"], p["height"])
     bmr  = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
     tdee = calc_tdee(bmr, p["activity"])
@@ -171,11 +189,10 @@ else:
         "Giảm cân": f"− {tdee - tdee_adj_preview:.0f} Calo so với TDEE",
         "Tăng cân": f"+ {tdee_adj_preview - tdee:.0f} Calo so với TDEE",
         "Duy trì":  "= Duy trì cân nặng",
-    } .get(p["goal"], "")
+    }.get(p["goal"], "")
 
-    # 🛠️ CHỈNH SỬA VỊ TRÍ 3: Chia trang bằng cấu trúc rẽ nhánh dựa vào current_step
     # --------------------------------------------------------------------------
-    # TRANG CHỌN MÓN (Mặc định hiện form lọc sau khi điền thông tin cá nhân)
+    # TRANG CHỌN MÓN (STEP: step_filter)
     # --------------------------------------------------------------------------
     if st.session_state.current_step == "step_filter":
         st.markdown("#### 🧠 Chỉ số sức khoẻ")
@@ -261,7 +278,8 @@ else:
         snack_mode = st.radio("", ["Không có", "Đồ uống", "Ăn vặt", "Đồ ngọt"], horizontal=True, key="snack_radio", label_visibility="collapsed")
 
         st.write("")
-        # Khi bấm nút: Đóng gói dữ liệu lựa chọn món rồi nhảy qua trang hiển thị thực đơn
+        
+        # KHI BẤM NÚT: Đóng gói toàn bộ bộ lọc và chuyển thẳng sang step_result (trang kết quả)
         if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
             st.session_state.user_choices = {
                 "diet_type": diet_type,
@@ -274,10 +292,10 @@ else:
             st.rerun()
 
     # --------------------------------------------------------------------------
-    # TRANG KẾT QUẢ THỰC ĐƠN (Chỉ hiển thị danh sách món ăn, giấu hoàn toàn form)
+    # TRANG HIỂN THỊ KẾT QUẢ THỰC ĐƠN (STEP: step_result)
     # --------------------------------------------------------------------------
     elif st.session_state.current_step == "step_result":
-        # Gọi lại gói dữ liệu mà người dùng đã thiết lập ở trang trước
+        # Khôi phục các tùy chọn người dùng đã tick ở trang trước
         choices = st.session_state.user_choices
         tdee_adj  = adjust_tdee(tdee, p["goal"], p["gender"])
         has_snack = choices["snack_mode"] != "Không có"
@@ -318,25 +336,23 @@ else:
                 img_tag = f'<img src="{dish["image_url"]}" style="width:100%;height:180px;object-fit:cover;display:block">' if dish.get("image_url") else ""
                 sc = score_color(dish["score"])
                 st.markdown(f"""
-<div style="background:#fff;border-radius:20px;overflow:hidden;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.07)">
-  {img_tag}
-  <div style="padding:1rem">
-    <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:0.2rem">{dish['dish_name']}</div>
-    <div style="font-size:0.75rem;color:#aaa;margin-bottom:0.75rem">{dish['dish_type']}</div>
-    <div style="display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap">
-      <span style="font-size:0.82rem;color:#e74c3c;font-weight:700">🔥 {dish['calo']} Calo</span>
-      <span style="font-size:0.82rem;color:#2980b9;font-weight:600">💪 {dish['protein']}g đạm</span>
-      <span style="font-size:0.82rem;color:#d35400;font-weight:600">🧈 {dish['fat']}g béo</span>
-      <span style="font-size:0.82rem;color:#27ae60;font-weight:600">🌾 {dish['fiber']}g xơ</span>
-    </div>
-    <div style="margin-top:0.6rem;font-size:0.72rem;color:#bbb">
-      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{sc};margin-right:4px"></span>
-      Điểm phù hợp: {dish['score']:.2f}
-    </div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
+<div style="background:#fff;border-radius:20px;overflow:hidden;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.07)"> 
+  {img_tag} 
+  <div style="padding:1rem"> 
+    <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:0.2rem">{dish['dish_name']}</div> 
+    <div style="font-size:0.75rem;color:#aaa;margin-bottom:0.75rem">{dish['dish_type']}</div> 
+    <div style="display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap"> 
+      <span style="font-size:0.82rem;color:#e74c3c;font-weight:700">🔥 {dish['calo']} Calo</span> 
+      <span style="font-size:0.82rem;color:#2980b9;font-weight:600">💪 {dish['protein']}g đạm</span> 
+      <span style="font-size:0.82rem;color:#d35400;font-weight:600">🧈 {dish['fat']}g béo</span> 
+      <span style="font-size:0.82rem;color:#27ae60;font-weight:600">🌾 {dish['fiber']}g xơ</span> 
+    </div> 
+    <div style="margin-top:0.6rem;font-size:0.72rem;color:#bbb"> 
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{sc};margin-right:4px"></span> 
+      Điểm phù hợp: {dish['score']:.2f} 
+    </div> 
+  </div> 
+</div> """, unsafe_allow_html=True)        
             st.write("")
 
         with st.expander("🔧 Debug — meal_targets & filters"):
@@ -354,12 +370,12 @@ else:
 
         st.write("")
         
-        # Nút quay về trang chọn món để chỉnh sửa bộ lọc cũ
+        # NÚT ĐIỀU HƯỚNG QUAY LẠI TRANG CHỌN MÓN ĐỂ CHỈNH SỬA
         if st.button("⬅️ Thay đổi tuỳ chọn ăn uống", use_container_width=True):
             st.session_state.current_step = "step_filter"
             st.rerun()
             
-        # Nút giữ nguyên cấu hình cũ, chạy lại hàm để đổi ngẫu nhiên món khác
+        # NÚT LÀM MỚI ĐỂ RANDOM MÓN KHÁC
         if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
             st.rerun()
 
