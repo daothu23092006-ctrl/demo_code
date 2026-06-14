@@ -58,6 +58,8 @@ if "show_suggestions" not in st.session_state:
     st.session_state.show_suggestions = False
 if "menu_done" not in st.session_state:
     st.session_state.menu_done = False
+if "user_choices" not in st.session_state:
+    st.session_state.user_choices = {}
 
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
@@ -147,6 +149,7 @@ else:
             st.session_state.profile_done = False
             st.session_state.menu_done = False
             st.session_state.show_suggestions = False
+            st.session_state.user_choices = {}
             st.rerun()
 
     bmi  = calc_bmi(p["weight"], p["height"])
@@ -156,14 +159,16 @@ else:
     bmi_class, _, bmi_icon = bmi_info(bmi)
 
     # -------------------------------------------------------------------------
-    # TRƯỜNG HỢP 2A: ĐÃ NHẤN NÚT GỢI Ý -> CẤT TRANG CŨ VÀO KHỐI EXPANDER VÀ HIỆN MÓN
+    # TRƯỜNG HỢP 2A: ĐÃ NHẤN NÚT GỢI Ý -> ĐỌC DỮ LIỆU TỪ "user_choices" ĐỂ HIỂN THỊ
     # -------------------------------------------------------------------------
     if st.session_state.menu_done:
-        # Gom gọn dữ liệu cơ thể và bộ lọc cũ lại thành một khối đóng/mở
+        choices = st.session_state.user_choices
+
+        # Gom gọn dữ liệu cơ thể và bộ lọc cũ lại thành một khối đóng/mở (Expander)
         with st.expander("📊 Xem lại Chỉ số sức khoẻ & Bộ lọc đã chọn", expanded=False):
             st.markdown(f"**BMI:** {bmi:.1f} ({bmi_class}) &nbsp;·&nbsp; **Mục tiêu calo:** {tdee_adj_preview:,.0f} kcal")
-            st.markdown(f"**Chế độ ăn:** {st.session_state.get('diet_radio')} &nbsp;·&nbsp; **Nguồn đạm:** {', '.join(st.session_state.get('protein_multi', []))}")
-            st.markdown(f"**Bữa trưa:** {st.session_state.get('lunch_radio')} &nbsp;·&nbsp; **Bữa tối:** {st.session_state.get('dinner_radio')} &nbsp;·&nbsp; **Bữa phụ:** {st.session_state.get('snack_radio')}")
+            st.markdown(f"**Chế độ ăn:** {choices.get('diet_type')} &nbsp;·&nbsp; **Nguồn đạm:** {', '.join(choices.get('preferred_sources', []))}")
+            st.markdown(f"**Bữa trưa:** {choices.get('lunch_mode')} &nbsp;·&nbsp; **Bữa tối:** {choices.get('dinner_mode')} &nbsp;·&nbsp; **Bữa phụ:** {choices.get('snack_mode')}")
             
             if st.button("🔄 Thay đổi bộ lọc ăn uống", use_container_width=True):
                 st.session_state.menu_done = False
@@ -171,9 +176,9 @@ else:
 
         st.divider()
 
-        # Render trang kết quả gợi ý món ăn mới
+        # Render trang kết quả gợi ý món ăn mới từ dữ liệu an toàn trong choices
         tdee_adj  = adjust_tdee(tdee, p["goal"], p["gender"])
-        has_snack = st.session_state.snack_radio != "Không có"
+        has_snack = choices.get('snack_mode') != "Không có"
         targets   = calc_meal_targets(tdee_adj, p["goal"], has_snack)
 
         st.success(f"💡 Mục tiêu hôm nay: **{tdee_adj:,.0f} kcal**")
@@ -181,11 +186,11 @@ else:
         with st.spinner("Đang tìm món phù hợp..."):
             suggestions = recommend_day(
                 meal_targets=targets,
-                diet_type=st.session_state.diet_radio,
-                preferred_sources=st.session_state.get('protein_multi', VEGAN_SOURCES if st.session_state.diet_radio == "Chay" else []),
-                snack_label=st.session_state.snack_radio,
-                lunch_mode=st.session_state.lunch_radio,
-                dinner_mode=st.session_state.dinner_radio,
+                diet_type=choices.get('diet_type'),
+                preferred_sources=choices.get('preferred_sources'),
+                snack_label=choices.get('snack_mode'),
+                lunch_mode=choices.get('lunch_mode'),
+                dinner_mode=choices.get('dinner_mode'),
             )
 
         MEAL_ICONS = {"Sáng": "🌄", "Trưa": "☀️", "Tối": "🌙", "Phụ": "🍎"}
@@ -235,16 +240,11 @@ else:
             st.json({
                 "tdee_final": round(tdee_adj, 1),
                 "meal_targets": targets,
-                "filters": {
-                    "diet_type": st.session_state.diet_radio,
-                    "preferred_sources": st.session_state.get('protein_multi', []),
-                    "snack_label": st.session_state.snack_radio,
-                    "lunch_mode": st.session_state.lunch_radio,
-                    "dinner_mode": st.session_state.dinner_radio,
-                },
+                "filters": choices,
             })
 
         st.write("")
+        # Khi nhấn nút này, hệ thống sẽ rerun và gọi lại hàm gợi ý ngẫu nhiên món khác dựa trên bộ lọc đã chọn trong choices
         if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
             st.rerun()
 
@@ -353,8 +353,15 @@ else:
 
         st.write("")
         
-        # Nhấn nút này để chuyển hẳn sang giao diện hiển thị món ăn
+        # Ngay khi bấm nút, "đóng băng" toàn bộ lựa chọn người dùng đưa vào state an toàn trước khi ẩn widget
         if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
+            st.session_state.user_choices = {
+                "diet_type": diet_type,
+                "preferred_sources": preferred_sources if diet_type == "Mặn" else VEGAN_SOURCES,
+                "lunch_mode": lunch_mode,
+                "dinner_mode": dinner_mode,
+                "snack_mode": snack_mode
+            }
             st.session_state.show_suggestions = True
             st.session_state.menu_done = True
             st.rerun()
