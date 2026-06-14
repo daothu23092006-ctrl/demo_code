@@ -134,9 +134,11 @@ def score_dish(row, meal_target, preferred_sources):
 
 def recommend_meal(meal_id, meal_target, df, diet_type, preferred_sources,
                    snack_label="Không có", meal_mode="Cơm + món",
-                   eaten_ids=None, top_n=3):
+                   eaten_ids=None, top_n=3, candidate_pool=15):
     """
     Trả về list top_n dict món ăn gợi ý cho 1 bữa.
+    Lấy top candidate_pool món có score cao nhất, sau đó random sample top_n
+    để mỗi lần "Gợi ý lại" ra bộ món khác nhau.
     meal_id: "Sáng" | "Trưa" | "Tối" | "Phụ"
     """
     pool = hard_filter(df, diet_type, meal_id, snack_label,
@@ -149,10 +151,14 @@ def recommend_meal(meal_id, meal_target, df, diet_type, preferred_sources,
     pool["_score"] = pool.apply(
         lambda r: score_dish(r, meal_target, preferred_sources), axis=1
     )
-    pool = pool.sort_values("_score", ascending=False).head(top_n)
+
+    # Lấy top candidate_pool món điểm cao nhất → random sample top_n trong đó
+    top_candidates = pool.sort_values("_score", ascending=False).head(candidate_pool)
+    n_sample = min(top_n, len(top_candidates))
+    selected = top_candidates.sample(n=n_sample).sort_values("_score", ascending=False)
 
     results = []
-    for _, row in pool.iterrows():
+    for _, row in selected.iterrows():
         results.append({
             "food_id":   int(row["food_id"]),
             "dish_name": row["dish_name"],
@@ -196,6 +202,7 @@ def recommend_day(meal_targets, diet_type, preferred_sources,
             meal_mode=meal_modes.get(meal_id, "Độc lập"),
             eaten_ids=eaten_ids,
             top_n=3,
+            candidate_pool=15,
         )
         day_results[meal_id] = suggestions
 
