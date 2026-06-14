@@ -55,7 +55,9 @@ if "profile" not in st.session_state:
     st.session_state.profile = {}
 if "show_suggestions" not in st.session_state:
     st.session_state.show_suggestions = False
-
+#
+if "current_step" not in st.session_state:
+    st.session_state.current_step = "step_profile"
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
     (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
@@ -111,6 +113,8 @@ if not st.session_state.profile_done:
             "gender": gender, "activity": activity, "goal": goal,
         }
         st.session_state.profile_done = True
+        #
+        st.session_state.current_step = "step_filter"
         st.rerun()
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -166,7 +170,7 @@ else:
         "Tăng cân": f"+ {tdee_adj_preview - tdee:.0f} Calo so với TDEE",
         "Duy trì":  "= Duy trì cân nặng",
     }.get(p["goal"], "")
-
+if st.session_state.current_step == "step_filter":
     st.markdown("#### 🧠 Chỉ số sức khoẻ")
 
     st.markdown(f"""
@@ -250,7 +254,104 @@ else:
     snack_mode = st.radio("", ["Không có", "Đồ uống", "Ăn vặt", "Đồ ngọt"], horizontal=True, key="snack_radio", label_visibility="collapsed")
 
     st.write("")
+    #
     if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
+            st.session_state.user_choices = {
+                "diet_type": diet_type,
+                "preferred_sources": preferred_sources if diet_type == "Mặn" else VEGAN_SOURCES,
+                "lunch_mode": lunch_mode,
+                "dinner_mode": dinner_mode,
+                "snack_mode": snack_mode
+            }
+            st.session_state.current_step = "step_result"
+            st.rerun()
+elif st.session_state.current_step == "step_result":
+        # Gọi lại gói dữ liệu mà người dùng đã thiết lập ở trang trước
+        choices = st.session_state.user_choices
+        tdee_adj  = adjust_tdee(tdee, p["goal"], p["gender"])
+        has_snack = choices["snack_mode"] != "Không có"
+        targets   = calc_meal_targets(tdee_adj, p["goal"], has_snack)
+
+        st.markdown("#### 🍱 Thực đơn gợi ý dành cho bạn")
+        st.success(f"💡 Mục tiêu hôm nay: **{tdee_adj:,.0f} kcal**")
+
+        with st.spinner("Đang tìm món phù hợp..."):
+            suggestions = recommend_day(
+                meal_targets=targets,
+                diet_type=choices["diet_type"],
+                preferred_sources=choices["preferred_sources"],
+                snack_label=choices["snack_mode"],
+                lunch_mode=choices["lunch_mode"],
+                dinner_mode=choices["dinner_mode"],
+            )
+        MEAL_ICONS = {"Sáng": "🌄", "Trưa": "☀️", "Tối": "🌙", "Phụ": "🍎"}
+
+        def score_color(s):
+            if s >= 0.75: return "#2ecc71"
+            if s >= 0.55: return "#f39c12"
+            return "#e74c3c"
+
+        for meal_id, dishes in suggestions.items():
+            target = targets[meal_id]
+            icon = MEAL_ICONS.get(meal_id, "🍽️")
+
+            st.markdown(f"**{icon} Bữa {meal_id}** &nbsp;·&nbsp; {target['calo']} kcal &nbsp;·&nbsp; {target['protein']}g protein", unsafe_allow_html=True)
+
+            if not dishes:
+                st.warning(f"Không tìm được món phù hợp cho bữa {meal_id}.")
+                st.write("")
+                continue
+
+            for dish in dishes:
+                img_tag = f'<img src="{dish["image_url"]}" style="width:100%;height:180px;object-fit:cover;display:block">' if dish.get("image_url") else ""
+                sc = score_color(dish["score"])
+                st.markdown(f"""
+<div style="background:#fff;border-radius:20px;overflow:hidden;margin-bottom:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.07)">
+  {img_tag}
+  <div style="padding:1rem">
+    <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:0.2rem">{dish['dish_name']}</div>
+    <div style="font-size:0.75rem;color:#aaa;margin-bottom:0.75rem">{dish['dish_type']}</div>
+    <div style="display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap">
+      <span style="font-size:0.82rem;color:#e74c3c;font-weight:700">🔥 {dish['calo']} Calo</span>
+      <span style="font-size:0.82rem;color:#2980b9;font-weight:600">💪 {dish['protein']}g đạm</span>
+      <span style="font-size:0.82rem;color:#d35400;font-weight:600">🧈 {dish['fat']}g béo</span>
+      <span style="font-size:0.82rem;color:#27ae60;font-weight:600">🌾 {dish['fiber']}g xơ</span>
+    </div>
+    <div style="margin-top:0.6rem;font-size:0.72rem;color:#bbb">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{sc};margin-right:4px"></span>
+      Điểm phù hợp: {dish['score']:.2f}
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
+            st.write("")
+
+        with st.expander("🔧 Debug — meal_targets & filters"):
+            st.json({
+                "tdee_final": round(tdee_adj, 1),
+                "meal_targets": targets,
+                "filters": {
+                    "diet_type": choices["diet_type"],
+                    "preferred_sources": choices["preferred_sources"],
+                    "snack_label": choices["snack_mode"],
+                    "lunch_mode": choices["lunch_mode"],
+                    "dinner_mode": choices["dinner_mode"],
+                },
+            })
+
+        st.write("")
+        
+        # Nút quay về trang chọn món để chỉnh sửa bộ lọc cũ
+        if st.button("⬅️ Thay đổi tuỳ chọn ăn uống", use_container_width=True):
+            st.session_state.current_step = "step_filter"
+            st.rerun()
+            
+        # Nút giữ nguyên cấu hình cũ, chạy lại hàm để đổi ngẫu nhiên món khác
+        if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
+            st.rerun()
+
+'''    if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
         st.session_state.show_suggestions = True
 
     if st.session_state.show_suggestions:
@@ -330,3 +431,4 @@ else:
         st.write("")
         if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
             st.rerun()
+'''
