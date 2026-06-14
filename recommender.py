@@ -5,14 +5,15 @@ DATA_PATH = "data/final_dishname.csv"
 
 # map protein source label (UI) → token trong protein_sources_str (CSV, phân tách bằng |)
 SOURCE_MAP = {
-    "Bò":             "bo",
-    "Heo":            "heo",
-    "Gà/Vịt":        "ga_vit",
-    "Cá":             "ca",
-    "Hải sản":        "hai_san",
-    "Trứng":          "trung",
-    "Đạm thực vật":   "dam_thuc_vat",
-    "Khác":           "khac",
+    "Bò":           "bo",
+    "Heo":          "heo",
+    "Gà":           "ga",
+    "Vịt":          "vit",
+    "Cá":           "ca",
+    "Hải sản":      "hai_san",
+    "Trứng":        "trung",
+    "Đạm thực vật": "dam_thuc_vat",
+    "Khác":         "khac",
 }
 
 # map snack_label (UI) → dish_type trong CSV
