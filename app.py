@@ -17,7 +17,7 @@ st.markdown("""
     margin-top: -1.5rem !important;
     padding-top: 0 !important;
 }
-[data-testid="stMain"] > div { padding-top: 2.5rem !important; }
+[data-testid="stMain"] > div { padding-top: 0 !important; }
 section[data-testid="stSidebar"] { background: #fff; }
 .block-container { max-width: 480px !important; padding: 2rem 1rem 2rem !important; margin: 0 auto !important; }
 [data-testid="stRadio"] > div { flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5rem !important; }
