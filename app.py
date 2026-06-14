@@ -214,7 +214,7 @@ else:
 
     st.divider()
 
-    st.markdown("#### 🌅 Hôm nay ăn gì?")
+    st.markdown("#### 🌅 Hôm nay bạn muốn ăn gì?")
 
     st.markdown('<span class="field-label">🥗 Chế độ ăn</span>', unsafe_allow_html=True)
     diet_type = st.radio("", ["Mặn", "Chay"], horizontal=True, key="diet_radio", label_visibility="collapsed")
@@ -231,7 +231,7 @@ else:
             label_visibility="collapsed"
         )
         if not preferred_sources:
-            st.warning("Chưa chọn nguồn đạm - hệ thống sẽ gợi ý tất cả các loại.")
+            st.warning("Bạn chưa chọn nguồn đạm - hệ thống sẽ gợi ý tất cả các loại.")
 
     col1, col2 = st.columns(2)
     with col1:
