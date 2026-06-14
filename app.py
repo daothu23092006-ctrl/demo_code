@@ -26,20 +26,27 @@ section[data-testid="stSidebar"] { background: #fff; }
 [data-testid="stSelectbox"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 [data-testid="stMultiSelect"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 [data-testid="stNumberInput"] input { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
+/* Label to đậm cho các section */
+.field-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.4rem;
+    margin-top: 0.75rem;
+    display: block;
+}
 footer, #MainMenu { visibility: hidden; }
 [data-testid="stToolbar"] { display: none; }
 </style>
 """, unsafe_allow_html=True)
 
 # Session state
-# Bộ nhớ tạm lưu trạng thái app (đang ở bước nào, thông tin user đã nhập) để không bị mất mỗi khi Streamlit chạy lại file.
 if "profile_done" not in st.session_state:
     st.session_state.profile_done = False
 if "profile" not in st.session_state:
     st.session_state.profile = {}
 
-# BMI logic (ràng buộc BMI caculated)
-# Bảng định nghĩa 5 mức BMI theo chuẩn châu Á, kèm nhãn, mục tiêu phù hợp và biểu tượng cảm xúc
+# BMI logic (WHO Asia-Pacific)
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
     (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
@@ -52,12 +59,12 @@ def bmi_info(bmi):
     for lo, hi, label, goals, icon in BMI_RANGES:
         if lo <= bmi < hi:
             return label, goals, icon
-    return "Béo phì", ["Giảm cân"], "🔴"       # Nếu mà BMI cao quá thì gán Béo Phì luôn
+    return "Béo phì", ["Giảm cân"], "🔴"
 
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
-# Header của app 
+# Header
 st.title("👩‍🍳🍜 Hôm nay ăn gì?")
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
@@ -78,14 +85,15 @@ if not st.session_state.profile_done:
         activity = st.selectbox("Mức độ vận động",
                       ["Ít vận động", "Vận động nhẹ", "Vận động vừa", "Vận động nhiều"])
 
-    gender = st.radio("Giới tính", ["Nam", "Nữ"], horizontal=True)
+    st.markdown('<span class="field-label">⚧ Giới tính</span>', unsafe_allow_html=True)
+    gender = st.radio("", ["Nam", "Nữ"], horizontal=True, key="gender_radio")
 
-    # Tính BMI tạm thời để hiển thị nhãn và mục tiêu phù hợp ngay khi nhập thông tin
     bmi_temp = calc_bmi(weight, height)
     bmi_class, allowed_goals, bmi_icon = bmi_info(bmi_temp)
     st.info(f"{bmi_icon} **BMI: {bmi_temp:.1f}** — {bmi_class}  ·  Mục tiêu phù hợp: **{' / '.join(allowed_goals)}**")
 
-    goal = st.radio("Mục tiêu", allowed_goals, horizontal=True)
+    st.markdown('<span class="field-label">🎯 Mục tiêu của bạn</span>', unsafe_allow_html=True)
+    goal = st.radio("", allowed_goals, horizontal=True, key="goal_radio")
     st.write("")
 
     if st.button("Lưu hồ sơ", use_container_width=True, type="primary"):
@@ -102,7 +110,6 @@ if not st.session_state.profile_done:
 else:
     p = st.session_state.profile
 
-    # Sidebar: hiển thị thông tin hồ sơ người dùng và chỉ số sức khoẻ cơ bản
     with st.sidebar:
         st.markdown("### 👤 Hồ sơ của bạn")
         st.markdown(f"""
@@ -135,7 +142,6 @@ else:
     tdee_adj_preview = adjust_tdee(tdee, p["goal"], p["gender"])
     bmi_class, _, bmi_icon = bmi_info(bmi)
 
-    # Badge màu theo BMI
     badge_cfg = {
         "Bình thường":          ("#e6f9ef", "#27ae60"),
         "Thiếu cân nhẹ":        ("#fff9e6", "#e67e22"),
@@ -149,7 +155,6 @@ else:
 
     st.markdown("#### 🧠 Chỉ số sức khoẻ")
 
-    # Row 1: 2 card BMI + TDEE
     col_bmi, col_tdee = st.columns(2)
     with col_bmi:
         st.markdown(f"""
@@ -174,7 +179,6 @@ else:
 </div>
 """, unsafe_allow_html=True)
 
-    # Row 2: 4 card thông tin cá nhân
     st.write("")
     s1, s2, s3, s4 = st.columns(4)
     for col, icon, val, lbl in [
@@ -194,28 +198,35 @@ else:
 
     st.divider()
 
-    # Tùy chọn gợi ý thực đơn trong ngày
+    # Hôm nay ăn gì
     st.markdown("#### 🌅 Hôm nay ăn gì?")
 
-    diet_type = st.radio("Chế độ ăn", ["Mặn", "Chay"], horizontal=True)
+    st.markdown('<span class="field-label">🥗 Chế độ ăn</span>', unsafe_allow_html=True)
+    diet_type = st.radio("", ["Mặn", "Chay"], horizontal=True, key="diet_radio")
+
     if diet_type == "Chay":
         st.info("🌿 Chế độ chay: nguồn đạm mặc định là Đạm thực vật")
         preferred_sources = VEGAN_SOURCES
     else:
+        st.markdown('<span class="field-label">💪 Nguồn đạm yêu thích</span>', unsafe_allow_html=True)
         preferred_sources = st.multiselect(
-            "Hãy chọn nguồn đạm yêu thích của bạn", ALL_PROTEIN_SOURCES, default=["Gà", "Cá"],
+            "", ALL_PROTEIN_SOURCES, default=["Gà", "Cá"],
             placeholder="Bạn hãy chọn ít nhất một nguồn đạm...",
+            key="protein_multi"
         )
         if not preferred_sources:
-            st.warning("Chưa chọn nguồn đạm - hệ thống sẽ gợi ý tất cả các loại.")
+            st.warning("Chưa chọn nguồn đạm — hệ thống sẽ gợi ý tất cả các loại.")
 
     col1, col2 = st.columns(2)
     with col1:
-        # [FIX 4] Giữ đúng label "Cơm + món" để khớp với recommender.py
-        lunch_mode = st.radio("Bữa trưa", ["Cơm + món", "Món độc lập (bún, phở...)"], horizontal=True)
+        st.markdown('<span class="field-label">☀️ Bữa trưa</span>', unsafe_allow_html=True)
+        lunch_mode = st.radio("", ["Cơm + món", "Món độc lập (bún, phở...)"], horizontal=True, key="lunch_radio")
     with col2:
-        dinner_mode = st.radio("Bữa tối", ["Cơm + món", "Món độc lập"], horizontal=True)
-    snack_mode = st.radio("Bữa phụ", ["Không có", "Đồ uống", "Ăn vặt", "Đồ ngọt"], horizontal=True)
+        st.markdown('<span class="field-label">🌙 Bữa tối</span>', unsafe_allow_html=True)
+        dinner_mode = st.radio("", ["Cơm + món", "Món độc lập"], horizontal=True, key="dinner_radio")
+
+    st.markdown('<span class="field-label">🍎 Bữa phụ</span>', unsafe_allow_html=True)
+    snack_mode = st.radio("", ["Không có", "Đồ uống", "Ăn vặt", "Đồ ngọt"], horizontal=True, key="snack_radio")
 
     st.write("")
     if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
@@ -223,7 +234,6 @@ else:
         has_snack = snack_mode != "Không có"
         targets   = calc_meal_targets(tdee_adj, p["goal"], has_snack)
 
-        # [FIX 2] Bỏ delta_map, chỉ hiện calo mục tiêu
         st.success(f"💡 Mục tiêu hôm nay: **{tdee_adj:,.0f} kcal**")
 
         with st.spinner("Đang tìm món phù hợp..."):
@@ -264,7 +274,7 @@ else:
   <div style="padding:1rem">
     <div style="font-size:1.05rem;font-weight:800;color:#1a1a1a;margin-bottom:0.2rem">{dish['dish_name']}</div>
     <div style="font-size:0.75rem;color:#aaa;margin-bottom:0.75rem">{dish['dish_type']}</div>
-    <div style="display:flex;gap:1.2rem;align-items:center">
+    <div style="display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap">
       <span style="font-size:0.82rem;color:#e74c3c;font-weight:700">🔥 {dish['calo']} Calo</span>
       <span style="font-size:0.82rem;color:#2980b9;font-weight:600">💪 {dish['protein']}g đạm</span>
       <span style="font-size:0.82rem;color:#d35400;font-weight:600">🧈 {dish['fat']}g béo</span>
