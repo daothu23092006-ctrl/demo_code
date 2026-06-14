@@ -56,9 +56,6 @@ if "profile" not in st.session_state:
     st.session_state.profile = {}
 if "show_suggestions" not in st.session_state:
     st.session_state.show_suggestions = False
-#
-if "current_step" not in st.session_state:
-    st.session_state.current_step = "step_profile"
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
     (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
