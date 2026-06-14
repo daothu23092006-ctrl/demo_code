@@ -14,9 +14,12 @@ st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f0f2f5; }
 [data-testid="stHeader"] {
+    background-color: transparent !important; /* Làm trong suốt thanh header thay vì ẩn mất */
+}
+/*[data-testid="stHeader"] {
     display: none !important;
     height: 0px !important;
-}
+}*/
 [data-testid="stMain"] > div { padding-top: 2rem !important; }
 section[data-testid="stSidebar"] { background: #fff; }
 .block-container { max-width: 480px !important; padding: 2rem 1rem 2rem !important; margin: 0 auto !important; }
