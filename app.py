@@ -86,14 +86,14 @@ if not st.session_state.profile_done:
                       ["Ít vận động", "Vận động nhẹ", "Vận động vừa", "Vận động nhiều"])
 
     st.markdown('<span class="field-label">⚧ Giới tính</span>', unsafe_allow_html=True)
-    gender = st.radio("", ["Nam", "Nữ"], horizontal=True, key="gender_radio")
+    gender = st.radio("", ["Nam", "Nữ"], horizontal=True, key="gender_radio", label_visibility="collapsed")
 
     bmi_temp = calc_bmi(weight, height)
     bmi_class, allowed_goals, bmi_icon = bmi_info(bmi_temp)
     st.info(f"{bmi_icon} **BMI: {bmi_temp:.1f}** — {bmi_class}  ·  Mục tiêu phù hợp: **{' / '.join(allowed_goals)}**")
 
     st.markdown('<span class="field-label">🎯 Mục tiêu của bạn</span>', unsafe_allow_html=True)
-    goal = st.radio("", allowed_goals, horizontal=True, key="goal_radio")
+    goal = st.radio("", allowed_goals, horizontal=True, key="goal_radio", label_visibility="collapsed")
     st.write("")
 
     if st.button("Lưu hồ sơ", use_container_width=True, type="primary"):
@@ -202,7 +202,7 @@ else:
     st.markdown("#### 🌅 Hôm nay ăn gì?")
 
     st.markdown('<span class="field-label">🥗 Chế độ ăn</span>', unsafe_allow_html=True)
-    diet_type = st.radio("", ["Mặn", "Chay"], horizontal=True, key="diet_radio")
+    diet_type = st.radio("", ["Mặn", "Chay"], horizontal=True, key="diet_radio", label_visibility="collapsed")
 
     if diet_type == "Chay":
         st.info("🌿 Chế độ chay: nguồn đạm mặc định là Đạm thực vật")
@@ -220,13 +220,13 @@ else:
     col1, col2 = st.columns(2)
     with col1:
         st.markdown('<span class="field-label">☀️ Bữa trưa</span>', unsafe_allow_html=True)
-        lunch_mode = st.radio("", ["Cơm + món", "Món độc lập (bún, phở...)"], horizontal=True, key="lunch_radio")
+        lunch_mode = st.radio("", ["Cơm + món", "Món độc lập (bún, phở...)"], horizontal=True, key="lunch_radio", label_visibility="collapsed")
     with col2:
         st.markdown('<span class="field-label">🌙 Bữa tối</span>', unsafe_allow_html=True)
-        dinner_mode = st.radio("", ["Cơm + món", "Món độc lập"], horizontal=True, key="dinner_radio")
+        dinner_mode = st.radio("", ["Cơm + món", "Món độc lập"], horizontal=True, key="dinner_radio", label_visibility="collapsed")
 
     st.markdown('<span class="field-label">🍎 Bữa phụ</span>', unsafe_allow_html=True)
-    snack_mode = st.radio("", ["Không có", "Đồ uống", "Ăn vặt", "Đồ ngọt"], horizontal=True, key="snack_radio")
+    snack_mode = st.radio("", ["Không có", "Đồ uống", "Ăn vặt", "Đồ ngọt"], horizontal=True, key="snack_radio", label_visibility="collapsed")
 
     st.write("")
     if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
