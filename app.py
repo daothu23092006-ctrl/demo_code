@@ -12,7 +12,11 @@ st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layo
 
 st.markdown("""
 <style>
-[data-testid="stAppViewContainer"] { background: #f0f2f5; }
+/*[data-testid="stAppViewContainer"] { background: #f0f2f5; }*/
+[data-testid="stAppViewContainer"] h1 {
+    margin-top: -1.5rem !important;
+    padding-top: 0 !important;
+}
 [data-testid="stMain"] > div { padding-top: 2.5rem !important; }
 section[data-testid="stSidebar"] { background: #fff; }
 .block-container { max-width: 480px !important; padding: 2rem 1rem 2rem !important; margin: 0 auto !important; }
@@ -69,11 +73,7 @@ def bmi_info(bmi):
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
-#st.title("👩‍🍳🍜 Hôm nay ăn gì?")
-#st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
-#st.divider()
-
-st.markdown('<h1 style="margin-top: 0rem; margin-bottom: 0rem; padding-top: 0rem;">👩‍🍳🍜 Hôm nay ăn gì?</h1>', unsafe_allow_html=True)
+st.title("👩‍🍳🍜 Hôm nay ăn gì?")
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
 
