@@ -69,9 +69,14 @@ def bmi_info(bmi):
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
-st.title("👩‍🍳🍜 Hôm nay ăn gì?")
+#st.title("👩‍🍳🍜 Hôm nay ăn gì?")
+#st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
+#st.divider()
+
+st.markdown('<h1 style="margin-top: 0rem; margin-bottom: 0rem; padding-top: 0rem;">👩‍🍳🍜 Hôm nay ăn gì?</h1>', unsafe_allow_html=True)
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # BƯỚC 1 - HỒ SƠ NGƯỜI DÙNG
