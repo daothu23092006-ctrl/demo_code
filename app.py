@@ -25,8 +25,8 @@ section[data-testid="stSidebar"] { background: #fff; }
 [data-testid="stMultiSelect"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 [data-testid="stNumberInput"] input { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 /* Label to đậm cho number input và selectbox */
-[data-testid="stNumberInput"] > label,
-[data-testid="stSelectbox"] > label {
+[data-testid="stNumberInput"] label,
+[data-testid="stSelectbox"] label {
     font-size: 1rem !important;
     font-weight: 700 !important;
     color: #1a1a1a !important;
@@ -154,29 +154,42 @@ else:
     bmi_pct = max(0, min(100, int((bmi - 14) / (32 - 14) * 100)))
     gender_icon = "♂️" if p["gender"] == "Nam" else "♀️"
 
+    delta_label = {
+        "Giảm cân": f"− {tdee - tdee_adj_preview:.0f} Calo so với TDEE",
+        "Tăng cân": f"+ {tdee_adj_preview - tdee:.0f} Calo so với TDEE",
+        "Duy trì":  "= Duy trì cân nặng",
+    }.get(p["goal"], "")
+
     st.markdown("#### 🧠 Chỉ số sức khoẻ")
 
-    col_bmi, col_tdee = st.columns(2)
-    with col_bmi:
-        st.markdown(f"""
-<div style="background:#fafafa;border:1.5px solid #f0f0f0;border-radius:16px;padding:1rem;min-height:140px">
-  <div style="font-size:0.68rem;color:#aaa;font-weight:600;letter-spacing:.05em">BMI</div>
-  <div style="font-size:2.2rem;font-weight:800;color:#1a1a1a;margin:0.1rem 0">{bmi:.1f}</div>
-  <span style="background:{badge_bg};color:{badge_color};padding:0.2rem 0.65rem;border-radius:50px;font-size:0.75rem;font-weight:700">{bmi_class}</span>
-  <div style="margin-top:0.65rem;background:#eee;border-radius:50px;height:6px">
+    st.markdown(f"""
+<div style="background:#fff;border:1.5px solid #e8e8e8;border-left:4px solid {badge_color};border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:0.75rem">
+  <div style="font-size:0.7rem;color:#aaa;font-weight:700;letter-spacing:.08em;text-transform:uppercase">BMI · Chỉ số khối cơ thể</div>
+  <div style="font-size:0.72rem;color:#bbb;margin-bottom:0.5rem">Đánh giá tình trạng cơ thể dựa trên chiều cao và cân nặng</div>
+  <div style="font-size:2.4rem;font-weight:800;color:#1a1a1a;line-height:1">{bmi:.1f}</div>
+  <div style="margin:0.5rem 0">
+    <span style="background:{badge_bg};color:{badge_color};padding:0.25rem 0.8rem;border-radius:50px;font-size:0.78rem;font-weight:700">{bmi_class}</span>
+  </div>
+  <div style="background:#eee;border-radius:50px;height:7px;margin-top:0.6rem">
     <div style="width:{bmi_pct}%;height:100%;background:{badge_color};border-radius:50px"></div>
   </div>
-  <div style="font-size:0.68rem;color:#bbb;margin-top:0.3rem">Chuẩn: 18.5 – 22.9</div>
+  <div style="font-size:0.68rem;color:#bbb;margin-top:0.3rem">Phạm vi chuẩn (châu Á): 18.5 – 22.9</div>
 </div>
 """, unsafe_allow_html=True)
 
-    with col_tdee:
-        st.markdown(f"""
-<div style="background:#f5f8ff;border:1.5px solid #dce8ff;border-radius:16px;padding:1rem;min-height:140px">
-  <div style="font-size:0.68rem;color:#aaa;font-weight:600;letter-spacing:.05em">🔥 TDEE</div>
-  <div style="font-size:1.7rem;font-weight:800;color:#1a1a1a;margin:0.1rem 0">{tdee:,.0f} <span style="font-size:0.8rem;font-weight:400;color:#aaa">kcal</span></div>
-  <div style="font-size:0.75rem;color:#3a5bd9;font-weight:600">Mục tiêu: {tdee_adj_preview:,.0f} kcal</div>
-  <div style="font-size:0.7rem;color:#aaa;margin-top:0.3rem">{p['activity']}</div>
+    st.markdown(f"""
+<div style="background:#fff;border:1.5px solid #e8e8e8;border-left:4px solid #3a5bd9;border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:0.75rem">
+  <div style="font-size:0.7rem;color:#aaa;font-weight:700;letter-spacing:.08em;text-transform:uppercase">🔥 TDEE · Tổng năng lượng tiêu hao</div>
+  <div style="font-size:0.72rem;color:#bbb;margin-bottom:0.5rem">Lượng calo cơ thể đốt cháy mỗi ngày theo mức vận động của bạn</div>
+  <div style="font-size:2.4rem;font-weight:800;color:#1a1a1a;line-height:1">{tdee:,.0f} <span style="font-size:0.9rem;font-weight:400;color:#aaa">Calo/ngày</span></div>
+  <div style="margin:0.5rem 0">
+    <span style="background:#eef2ff;color:#3a5bd9;padding:0.25rem 0.8rem;border-radius:50px;font-size:0.78rem;font-weight:600">Mức vận động: {p['activity']}</span>
+  </div>
+  <div style="border-top:1px solid #f0f0f0;margin-top:0.75rem;padding-top:0.75rem;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:0.8rem;color:#555">Mục tiêu của bạn ({p['goal']})</span>
+    <span style="font-size:1rem;font-weight:800;color:#FF6B6B">{tdee_adj_preview:,.0f} Calo</span>
+  </div>
+  <div style="font-size:0.72rem;color:#3a5bd9;margin-top:0.2rem">{delta_label}</div>
 </div>
 """, unsafe_allow_html=True)
 
