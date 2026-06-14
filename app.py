@@ -8,10 +8,8 @@ from calculator import (
 # Nạp hàm gợi ý thực đơn từ recommender.py
 from recommender import recommend_day
 
-# Tiêu đề và biểu tượng cho app
 st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layout="centered")
 
-# Phần CSS tuỳ chỉnh để làm đẹp giao diện
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f0f2f5; }
@@ -26,6 +24,13 @@ section[data-testid="stSidebar"] { background: #fff; }
 [data-testid="stSelectbox"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 [data-testid="stMultiSelect"] > div > div { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
 [data-testid="stNumberInput"] input { border-radius: 14px !important; border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }
+/* Label to đậm cho number input và selectbox */
+[data-testid="stNumberInput"] label,
+[data-testid="stSelectbox"] label {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: #1a1a1a !important;
+}
 /* Label to đậm cho các section */
 .field-label {
     font-size: 1rem;
@@ -40,13 +45,11 @@ footer, #MainMenu { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
-# Session state
 if "profile_done" not in st.session_state:
     st.session_state.profile_done = False
 if "profile" not in st.session_state:
     st.session_state.profile = {}
 
-# BMI logic (WHO Asia-Pacific)
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
     (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
@@ -64,7 +67,6 @@ def bmi_info(bmi):
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
-# Header
 st.title("👩‍🍳🍜 Hôm nay ăn gì?")
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
@@ -135,7 +137,6 @@ else:
             st.session_state.profile_done = False
             st.rerun()
 
-    # Chỉ số sức khoẻ
     bmi  = calc_bmi(p["weight"], p["height"])
     bmr  = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
     tdee = calc_tdee(bmr, p["activity"])
@@ -198,7 +199,6 @@ else:
 
     st.divider()
 
-    # Hôm nay ăn gì
     st.markdown("#### 🌅 Hôm nay ăn gì?")
 
     st.markdown('<span class="field-label">🥗 Chế độ ăn</span>', unsafe_allow_html=True)
