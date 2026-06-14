@@ -14,12 +14,12 @@ MACRO_RATIOS = {
 }
 
 MEAL_RATIOS = {
-    False: {  # không có bữa phụ
+    False: {
         "Giảm cân": {"Sáng": 0.30, "Trưa": 0.40, "Tối": 0.30},
         "Duy trì":  {"Sáng": 0.25, "Trưa": 0.35, "Tối": 0.40},
         "Tăng cân": {"Sáng": 0.25, "Trưa": 0.35, "Tối": 0.40},
     },
-    True: {   # có bữa phụ
+    True: {
         "Giảm cân": {"Sáng": 0.25, "Trưa": 0.35, "Tối": 0.25, "Phụ": 0.15},
         "Duy trì":  {"Sáng": 0.20, "Trưa": 0.30, "Tối": 0.35, "Phụ": 0.15},
         "Tăng cân": {"Sáng": 0.20, "Trưa": 0.30, "Tối": 0.35, "Phụ": 0.15},
@@ -34,29 +34,19 @@ def calc_bmi(weight_kg, height_cm):
 
 def bmi_label(bmi):
     """
-    Phân loại BMI theo chuẩn châu Á và trả về danh sách mục tiêu tương ứng.
+    Phân loại BMI 5 mức theo chuẩn châu Á (pipeline Tầng 2 mục 2.1).
+    Trả về (bmi_class, allowed_goals) — giữ nguyên interface gốc.
     """
     if bmi < 17.0:
-        bmi_class = "Thiếu cân (Vừa/Nặng)"
-        allowed_goals = ["Tăng cân"]
-        
-    elif 17.0 <= bmi < 18.5:
-        bmi_class = "Thiếu cân nhẹ"
-        allowed_goals = ["Tăng cân", "Duy trì"]
-        
-    elif 18.5 <= bmi < 23.0:
-        bmi_class = "Bình thường"
-        allowed_goals = ["Giảm cân", "Duy trì", "Tăng cân"]
-        
-    elif 23.0 <= bmi < 25.0:
-        bmi_class = "Thừa cân"
-        allowed_goals = ["Giảm cân", "Duy trì"]
-        
-    elif bmi >= 25.0:
-        bmi_class = "Béo phì"
-        allowed_goals = ["Giảm cân"]
-        
-    return bmi_class, allowed_goals
+        return "Thiếu cân (Vừa/Nặng)", ["Tăng cân"]
+    elif bmi < 18.5:
+        return "Thiếu cân nhẹ", ["Tăng cân", "Duy trì"]
+    elif bmi < 23.0:
+        return "Bình thường", ["Giảm cân", "Duy trì", "Tăng cân"]
+    elif bmi < 25.0:
+        return "Thừa cân", ["Giảm cân", "Duy trì"]
+    else:
+        return "Béo phì", ["Giảm cân"]
 
 
 def calc_bmr(weight_kg, height_cm, age, gender):
@@ -69,6 +59,7 @@ def calc_tdee(bmr, activity):
 
 
 def adjust_tdee(tdee, goal, gender):
+    """Điều chỉnh TDEE theo mục tiêu + mức tối thiểu (Tầng 2 mục 2.4)."""
     deficit = 300 if tdee < 1800 else 500
     if goal == "Giảm cân":
         min_val = 1200 if gender == "Nữ" else 1500
@@ -79,16 +70,16 @@ def adjust_tdee(tdee, goal, gender):
 
 
 def calc_meal_targets(tdee_final, goal, has_snack):
+    """Output Tầng 2: meal_targets[] truyền xuống Tầng 3."""
     p_ratio, f_ratio = MACRO_RATIOS[goal]
     protein_day = (tdee_final * p_ratio) / 4
     fat_day     = (tdee_final * f_ratio) / 9
-
     ratios = MEAL_RATIOS[has_snack][goal]
-    targets = {}
-    for meal, r in ratios.items():
-        targets[meal] = {
+    return {
+        meal: {
             "calo":    round(tdee_final  * r),
             "protein": round(protein_day * r, 1),
             "fat":     round(fat_day     * r, 1),
         }
-    return targets
+        for meal, r in ratios.items()
+    }
