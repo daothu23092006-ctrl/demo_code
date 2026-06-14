@@ -90,7 +90,7 @@ if not st.session_state.profile_done:
 
     bmi_temp = calc_bmi(weight, height)
     bmi_class, allowed_goals, bmi_icon = bmi_info(bmi_temp)
-    st.info(f"{bmi_icon} **BMI: {bmi_temp:.1f}** — {bmi_class}  ·  Mục tiêu phù hợp: **{' / '.join(allowed_goals)}**")
+    st.info(f"{bmi_icon} **BMI: {bmi_temp:.1f}** — {bmi_class}\n\nMục tiêu phù hợp cho bạn: **{' / '.join(allowed_goals)}**")
 
     st.markdown('<span class="field-label">🎯 Mục tiêu của bạn</span>', unsafe_allow_html=True)
     goal = st.radio("", allowed_goals, horizontal=True, key="goal_radio", label_visibility="collapsed")
