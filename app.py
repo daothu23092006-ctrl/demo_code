@@ -8,13 +8,7 @@ from calculator import (
 # Nạp hàm gợi ý thực đơn từ recommender.py
 from recommender import recommend_day
 
-# Cấu hình ẩn hẳn sidebar ngay từ đầu để giao diện tập trung vào màn hình chính
-st.set_page_config(
-    page_title="Hôm nay ăn gì?", 
-    page_icon="👩‍🍳", 
-    layout="centered",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layout="centered")
 
 st.markdown("""
 <style>
@@ -24,7 +18,7 @@ st.markdown("""
     height: 0px !important;
 }
 [data-testid="stMain"] > div { padding-top: 2rem !important; }
-section[data-testid="stSidebar"] { display: none !important; } /* Ẩn hoàn toàn thanh bên trái */
+section[data-testid="stSidebar"] { background: #fff; }
 .block-container { max-width: 480px !important; padding: 2rem 1rem 2rem !important; margin: 0 auto !important; }
 [data-testid="stRadio"] > div { flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5rem !important; }
 [data-testid="stRadio"] label { border-radius: 50px !important; border: 1.5px solid #e8e8e8 !important; padding: 0.4rem 1rem !important; font-size: 0.85rem !important; font-weight: 500 !important; color: #555 !important; background: #fafafa !important; cursor: pointer !important; }
@@ -90,7 +84,7 @@ st.divider()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# BƯỚC 1 - HỒ SƠ NGƯỜI DÙNG (MÀN HÌNH NHẬP LIỆU BAN ĐẦU)
+# BƯỚC 1 - HỒ SƠ NGƯỜI DÙNG
 # ══════════════════════════════════════════════════════════════════════════════
 if not st.session_state.profile_done:
     st.markdown("#### 📋 Hồ sơ sức khoẻ")
@@ -130,6 +124,34 @@ if not st.session_state.profile_done:
 else:
     p = st.session_state.profile
 
+    with st.sidebar:
+        st.markdown("### 👤 Hồ sơ của bạn")
+        st.markdown(f"""
+| | |
+|---|---|
+| Tuổi | {p['age']} |
+| Giới tính | {p['gender']} |
+| Cân nặng | {p['weight']} kg |
+| Chiều cao | {p['height']} cm |
+| Hoạt động | {p['activity']} |
+| Mục tiêu | {p['goal']} |
+""")
+        bmi_s = calc_bmi(p["weight"], p["height"])
+        bmi_cls_s, _, _ = bmi_info(bmi_s)
+        bmr_s = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
+        tdee_s = calc_tdee(bmr_s, p["activity"])
+        tdee_adj_s = adjust_tdee(tdee_s, p["goal"], p["gender"])
+        st.divider()
+        st.metric("BMI", f"{bmi_s:.1f}", bmi_cls_s)
+        st.metric("TDEE mục tiêu", f"{tdee_adj_s:.0f} kcal")
+        st.divider()
+        if st.button("✏️ Cập nhật hồ sơ", use_container_width=True):
+            st.session_state.profile_done = False
+            st.session_state.menu_done = False
+            st.session_state.show_suggestions = False
+            st.session_state.user_choices = {}
+            st.rerun()
+
     bmi  = calc_bmi(p["weight"], p["height"])
     bmr  = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
     tdee = calc_tdee(bmr, p["activity"])
@@ -144,7 +166,6 @@ else:
 
         # Gom gọn dữ liệu cơ thể và bộ lọc cũ lại thành một khối đóng/mở (Expander)
         with st.expander("📊 Xem lại Chỉ số sức khoẻ & Bộ lọc đã chọn", expanded=False):
-            st.markdown(f"**Thông tin:** {p['height']:.0f}cm · {p['weight']:.0f}kg · {p['age']} tuổi ({p['gender']})")
             st.markdown(f"**BMI:** {bmi:.1f} ({bmi_class}) &nbsp;·&nbsp; **Mục tiêu calo:** {tdee_adj_preview:,.0f} kcal")
             st.markdown(f"**Chế độ ăn:** {choices.get('diet_type')} &nbsp;·&nbsp; **Nguồn đạm:** {', '.join(choices.get('preferred_sources', []))}")
             st.markdown(f"**Bữa trưa:** {choices.get('lunch_mode')} &nbsp;·&nbsp; **Bữa tối:** {choices.get('dinner_mode')} &nbsp;·&nbsp; **Bữa phụ:** {choices.get('snack_mode')}")
@@ -223,6 +244,7 @@ else:
             })
 
         st.write("")
+        # Khi nhấn nút này, hệ thống sẽ rerun và gọi lại hàm gợi ý ngẫu nhiên món khác dựa trên bộ lọc đã chọn trong choices
         if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
             st.rerun()
 
@@ -281,7 +303,6 @@ else:
 """, unsafe_allow_html=True)
 
         st.write("")
-        # Khối hiển thị 4 thông số nhỏ cơ bản
         s1, s2, s3, s4 = st.columns(4)
         for col, icon, val, lbl in [
             (s1, "📏", f"{p['height']:.0f}", "Chiều cao"),
@@ -297,15 +318,6 @@ else:
   <div style="font-size:0.62rem;color:#aaa;margin-top:0.1rem">{lbl}</div>
 </div>
 """, unsafe_allow_html=True)
-
-        # ĐƯA NÚT CẬP NHẬT HỒ SƠ RA NGAY ĐÂY (MÀN HÌNH CHÍNH) - GIẢI QUYẾT TRIỆT ĐỂ LỖI ẨN SIDEBAR
-        st.write("")
-        if st.button("✏️ Cập nhật lại hồ sơ sức khỏe (Tuổi, Cân nặng...)", use_container_width=True):
-            st.session_state.profile_done = False
-            st.session_state.menu_done = False
-            st.session_state.show_suggestions = False
-            st.session_state.user_choices = {}
-            st.rerun()
 
         st.divider()
 
@@ -341,7 +353,7 @@ else:
 
         st.write("")
         
-        # Lưu các lựa chọn bộ lọc vào cụm state an toàn và chuyển trang hiển thị món ăn
+        # Ngay khi bấm nút, "đóng băng" toàn bộ lựa chọn người dùng đưa vào state an toàn trước khi ẩn widget
         if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
             st.session_state.user_choices = {
                 "diet_type": diet_type,
