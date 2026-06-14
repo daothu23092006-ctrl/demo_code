@@ -54,7 +54,6 @@ def bmi_info(bmi):
             return label, goals, icon
     return "Béo phì", ["Giảm cân"], "🔴"       # Nếu mà BMI cao quá thì gán Béo Phì luôn
 
-# [FIX 3] Tách "Gà/Vịt" → "Gà" và "Vịt" cho khớp token trong CSV
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
@@ -75,7 +74,7 @@ if not st.session_state.profile_done:
         height = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=250.0, value=165.0, step=0.5)
         weight = st.number_input("Cân nặng (kg)",  min_value=30.0,  max_value=200.0, value=60.0,  step=0.5)
     with col2:
-        age = st.number_input("Tuổi", min_value=10, max_value=100, value=22)
+        age = st.number_input("Tuổi", min_value=20, max_value=49, value=22)
         activity = st.selectbox("Mức độ vận động",
                       ["Ít vận động", "Vận động nhẹ", "Vận động vừa", "Vận động nhiều"])
 
