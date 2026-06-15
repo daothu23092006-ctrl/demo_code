@@ -63,7 +63,71 @@ if "menu_done" not in st.session_state:
     st.session_state.menu_done = False
 if "user_choices" not in st.session_state:
     st.session_state.user_choices = {}
+#
+common_style = """
+[data-testid="stHeader"] { display: none !important; height: 0px !important; }
+[data-testid="stMain"] > div { padding-top: 1.5rem !important; }
+.block-container { max-width: 480px !important; padding: 1.5rem 1rem 2rem !important; margin: 0 auto !important; }
+[data-testid="stRadio"] > div { flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5rem !important; }
+[data-testid="stRadio"] label { border-radius: 50px !important; padding: 0.4rem 1rem !important; font-size: 0.85rem !important; font-weight: 500 !important; cursor: pointer !important; }
+[data-testid="stButton"] > button[kind="primary"] { background: linear-gradient(135deg, #FF6B6B, #FF8E53) !important; color: #fff !important; border: none !important; border-radius: 50px !important; padding: 0.7rem 1.5rem !important; font-size: 1rem !important; font-weight: 600 !important; width: 100% !important; box-shadow: 0 4px 15px rgba(255,107,107,0.35) !important; }
+[data-testid="stButton"] > button:not([kind="primary"]) { border-radius: 50px !important; font-size: 0.85rem !important; padding: 0.4rem 1.2rem !important; }
+[data-testid="stSelectbox"] > div > div, [data-testid="stMultiSelect"] > div > div, [data-testid="stNumberInput"] input { border-radius: 14px !important; }
+[data-testid="stNumberInput"] label, [data-testid="stSelectbox"] label { font-size: 1rem !important; font-weight: 700 !important; }
+.field-label { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; margin-top: 0.75rem; display: block; }
+footer, #MainMenu { visibility: hidden; }
+[data-testid="stToolbar"] { display: none; }
+[data-testid="stSidebarCollapseButton"] { display: none !important; }
 
+/* Ép cột chứa nút gạt nằm chuẩn ở góc trên bên phải dòng tiêu đề */
+div[data-testid="stColumn"]:nth-of-type(2) {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: flex-start !important;
+    padding-top: 15px !important;
+}
+"""
+#
+if st.session_state.theme_mode == "Dark":
+    st.markdown(f"""
+    <style>
+    {common_style}
+    /* Chế độ Tối */
+    [data-testid="stAppViewContainer"] {{ background: #141419 !important; }}
+    [data-testid="stMarkdownContainer"] p, h1, h2, h3, h4, h5, h6, span, label, li, th, td {{ color: #ffffff !important; }}
+    [data-testid="stRadio"] label {{ border: 1.5px solid #3f3f4f !important; color: #cccccc !important; background: #2a2a35 !important; }}
+    [data-testid="stRadio"] label:has(input:checked) {{ background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }}
+    [data-testid="stButton"] > button:not([kind="primary"]) {{ border: 1.5px solid #3f3f4f !important; background: #2a2a35 !important; color: #ffffff !important; }}
+    [data-testid="stSelectbox"] > div > div, [data-testid="stMultiSelect"] > div > div, [data-testid="stNumberInput"] input {{ border: 1.5px solid #3f3f4f !important; background: #2a2a35 !important; color: #ffffff !important; }}
+    .field-label {{ color: #ffffff !important; }}
+    [data-testid="stMetricValue"] {{ color: #ffffff !important; }}
+    div[data-testid="stExpander"] {{ background: #2a2a35 !important; border: 1px solid #3f3f4f !important; border-radius: 14px !important; }}
+    .dish-card {{ background: #2a2a35 !important; border: 1px solid #3f3f4f !important; }}
+    .dish-title {{ color: #ffffff !important; }}
+    .dish-sub {{ color: #aaaaaa !important; }}
+    .dish-stats-bar {{ border-top: 1px solid #3f3f4f !important; }}
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    st.markdown(f"""
+    <style>
+    {common_style}
+    /* Chế độ Sáng chuẩn */
+    [data-testid="stAppViewContainer"] {{ background: #f0f2f5 !important; }}
+    [data-testid="stRadio"] label {{ border: 1.5px solid #e8e8e8 !important; color: #555 !important; background: #fafafa !important; }}
+    [data-testid="stRadio"] label:has(input:checked) {{ background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }}
+    [data-testid="stButton"] > button:not([kind="primary"]) {{ border: 1.5px solid #e8e8e8 !important; background: #fafafa !important; color: #555 !important; }}
+    [data-testid="stSelectbox"] > div > div, [data-testid="stMultiSelect"] > div > div, [data-testid="stNumberInput"] input {{ border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; color: #1a1a1a !important; }}
+    [data-testid="stNumberInput"] label, [data-testid="stSelectbox"] label {{ color: #1a1a1a !important; }}
+    .field-label {{ color: #1a1a1a; }}
+    div[data-testid="stExpander"] {{ background: #ffffff !important; border: 1px solid #e8e8e8 !important; border-radius: 14px !important; }}
+    .dish-card {{ background: #ffffff !important; border: 1px solid #e8e8e8 !important; }}
+    .dish-title {{ color: #1a1a1a !important; }}
+    .dish-sub {{ color: #aaaaaa !important; }}
+    .dish-stats-bar {{ border-top: 1px solid #f0f0f0 !important; }}
+    </style>
+    """, unsafe_allow_html=True)
+#
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
     (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
@@ -81,7 +145,19 @@ def bmi_info(bmi):
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
-st.title("👩‍🍳🍜 Hôm nay ăn gì?")
+top_col1, top_col2 = st.columns([3, 1])
+
+with top_col1:
+    st.title("👩‍🍳🍜 Hôm nay ăn gì?")
+
+with top_col2:
+    # Nút công tắc toggle nhỏ gọn ở góc trên bên phải
+    is_dark = st.toggle("🌙", value=(st.session_state.theme_mode == "Dark"), key="toggle_theme_corner")
+    new_theme = "Dark" if is_dark else "Light"
+    if new_theme != st.session_state.theme_mode:
+        st.session_state.theme_mode = new_theme
+        st.rerun()
+#st.title("👩‍🍳🍜 Hôm nay ăn gì?")
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
 
