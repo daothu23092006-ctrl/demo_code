@@ -48,9 +48,8 @@ section[data-testid="stSidebar"] { background: #fff; }
     margin-top: 0.75rem;
     display: block;
 }
-footer, #MainMenu { visibility: hidden; }
-[data-testid="stToolbar"] { display: visible; }
-</style>
+footer, #MainMenu, [data-testid="stToolbar"] { visibility: hidden; } 
+[data-testid="stSidebarCollapseButton"] { visibility: visible; }   
 """, unsafe_allow_html=True)
 
 # Khởi tạo các biến lưu trữ trạng thái hệ thống
