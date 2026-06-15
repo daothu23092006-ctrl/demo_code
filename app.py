@@ -13,14 +13,10 @@ st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layo
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f0f2f5; }
-[data-testid="stHeader"] { 
-    background: transparent !important; 
-    color: inherit !important;
-}
-/*[data-testid="stHeader"] {
+[data-testid="stHeader"] {
     display: none !important;
     height: 0px !important;
-}*/
+}
 [data-testid="stMain"] > div { padding-top: 2rem !important; }
 section[data-testid="stSidebar"] { background: #fff; }
 .block-container { max-width: 480px !important; padding: 2rem 1rem 2rem !important; margin: 0 auto !important; }
