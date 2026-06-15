@@ -71,7 +71,7 @@ def hard_filter(df, diet_type, meal_id, snack_label, calo_quota,
     df = df[df["diet_type"] == diet_csv]
 
     # calo quota
-    df = df[df["calories"] <= calo_quota + 50]
+    df = df[df["calories"] <= calo_quota + 25]
                  
     # eaten log
     if eaten_ids:
