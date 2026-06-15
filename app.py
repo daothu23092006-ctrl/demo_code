@@ -45,38 +45,9 @@ section[data-testid="stSidebar"] { background: #fff; }
     display: block;
 }
 footer, #MainMenu { visibility: hidden; }
-[data-testid="stToolbar"] { display: visible; }
-"""
-
-if st.session_state.theme_mode == "Dark":
-    st.markdown(f"""
-    <style>
-    {common_style}
-    /* Chế độ Tối */
-    [data-testid="stAppViewContainer"] {{ background: #141419 !important; }}
-    [data-testid="stMarkdownContainer"] p, h1, h2, h3, h4, h5, h6, span, label, li {{ color: #ffffff !important; }}
-    [data-testid="stRadio"] label {{ border: 1.5px solid #3f3f4f !important; color: #cccccc !important; background: #2a2a35 !important; }}
-    [data-testid="stRadio"] label:has(input:checked) {{ background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }}
-    [data-testid="stButton"] > button:not([kind="primary"]) {{ border: 1.5px solid #3f3f4f !important; background: #2a2a35 !important; color: #ffffff !important; }}
-    [data-testid="stSelectbox"] > div > div, [data-testid="stMultiSelect"] > div > div, [data-testid="stNumberInput"] input {{ border: 1.5px solid #3f3f4f !important; background: #2a2a35 !important; color: #ffffff !important; }}
-    .field-label {{ color: #ffffff !important; }}
-    [data-testid="stMetricValue"] {{ color: #ffffff !important; }}
-    </style>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown(f"""
-    <style>
-    {common_style}
-    /* Chế độ Sáng chuẩn của bạn */
-    [data-testid="stAppViewContainer"] {{ background: #f0f2f5 !important; }}
-    [data-testid="stRadio"] label {{ border: 1.5px solid #e8e8e8 !important; color: #555 !important; background: #fafafa !important; }}
-    [data-testid="stRadio"] label:has(input:checked) {{ background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }}
-    [data-testid="stButton"] > button:not([kind="primary"]) {{ border: 1.5px solid #e8e8e8 !important; background: #fafafa !important; color: #555 !important; }}
-    [data-testid="stSelectbox"] > div > div, [data-testid="stMultiSelect"] > div > div, [data-testid="stNumberInput"] input {{ border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; color: #1a1a1a !important; }}
-    [data-testid="stNumberInput"] label, [data-testid="stSelectbox"] label {{ color: #1a1a1a !important; }}
-    .field-label {{ color: #1a1a1a; }}
-    </style>
-    """, unsafe_allow_html=True)
+[data-testid="stToolbar"] { display: visible; 
+</style>
+""", unsafe_allow_html=True)
 
 # Khởi tạo các biến lưu trữ trạng thái hệ thống
 if "theme_mode" not in st.session_state:
