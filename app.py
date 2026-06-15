@@ -46,8 +46,7 @@ section[data-testid="stSidebar"] { background: #fff; }
 }
 footer, #MainMenu { visibility: hidden; }
 [data-testid="stToolbar"] { display: visible; }
-</style>
-""", unsafe_allow_html=True)
+"""
 
 if st.session_state.theme_mode == "Dark":
     st.markdown(f"""
