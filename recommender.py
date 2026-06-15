@@ -32,7 +32,7 @@ STANDALONE_DISH_TYPES = {"món độc lập"}
 
 def load_db():
     df = pd.read_csv(DATA_PATH)
-    df = df[~df["is_calories_error"]].reset_index(drop=True)
+    #df = df[~df["is_calories_error"]].reset_index(drop=True)
     return df
 
 
