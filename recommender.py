@@ -1,6 +1,6 @@
 # recommender.py — Tầng 3: hard filter + scoring + pick top meals
 import pandas as pd
-
+ 
 DATA_PATH = "data/final_dishname.csv"
 
 # map protein source label (UI) → token trong protein_sources_str (CSV, phân tách bằng |)
@@ -120,7 +120,7 @@ def score_dish(row, meal_target, preferred_sources):
 
     preference_score = 1.0 if _source_match(row["protein_sources_str"], preferred_sources) else 0.5
 
-    fiber_score = min((row["fiber_pp] or 0) / calo * 100, 1)
+    fiber_score = min((row["fiber_pp"] or 0) / calo * 100, 1)
     sugar_score = 1 - min((row["sugar_pp"] or 0) / calo * 100, 1)
 
     return (
