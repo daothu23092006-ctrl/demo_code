@@ -49,7 +49,7 @@ section[data-testid="stSidebar"] { background: #fff; }
     display: block;
 }
 footer, #MainMenu { visibility: hidden; }
-[data-testid="stToolbar"] { display: none; }
+[data-testid="stToolbar"] { display: visible; }
 </style>
 """, unsafe_allow_html=True)
 
