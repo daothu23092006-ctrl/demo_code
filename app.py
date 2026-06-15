@@ -8,7 +8,7 @@ from calculator import (
 # Nạp hàm gợi ý thực đơn từ recommender.py
 from recommender import recommend_day
 
-st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layout="centered")
+st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layout="centered") 
 
 st.markdown("""
 <style>
