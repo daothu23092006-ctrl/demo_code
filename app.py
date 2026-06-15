@@ -59,7 +59,7 @@ section[data-testid="stSidebar"] {
     display: block !important;
     visibility: visible !important;
     transform: translate3d(0px, 0px, 0px) !important; /* Ép sidebar nằm cố định ở tọa độ hiển thị */
-    min-width: 250px !important; /* Đảm bảo chiều rộng của sidebar không bị co về 0 */
+    min-width: 25px !important; /* Đảm bảo chiều rộng của sidebar không bị co về 0 */
 }
 
 /* 3. Đẩy nội dung chính sang bên phải để không bị thanh sidebar che khuất */
