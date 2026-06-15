@@ -248,12 +248,12 @@ else:
 
             st.write("")
 
-        with st.expander("🔧 Debug — meal_targets & filters"):
+       ''' with st.expander("🔧 Debug — meal_targets & filters"):
             st.json({
                 "tdee_final": round(tdee_adj, 1),
                 "meal_targets": targets,
                 "filters": choices,
-            })
+            })'''
 
         st.write("")
         # Khi nhấn nút này, hệ thống sẽ rerun và gọi lại hàm gợi ý ngẫu nhiên món khác dựa trên bộ lọc đã chọn trong choices
