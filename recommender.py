@@ -71,30 +71,8 @@ def hard_filter(df, diet_type, meal_id, snack_label, calo_quota,
     df = df[df["diet_type"] == diet_csv]
 
     # calo quota
-    #df = df[df["calories"] <= calo_quota]
-    # Bước 1: Đặt mức "Sàn calo tối thiểu" để tránh việc tính toán ở UI chia calo quá thấp 
-    # khiến dataset không có món nào đáp ứng được.
-    if meal_id in ["Sáng", "Trưa", "Tối"]:
-        # Bữa chính trong dataset ít nhất phải tầm 250 calo mới có món ngon/đủ chất
-        effective_quota = max(calo_quota, 250) 
-    else: # Bữa Phụ
-        # Bữa phụ tối thiểu 70 calo
-        effective_quota = max(calo_quota, 70)
-
-    # Bước 2: Tiến hành lọc theo mức quota đã tối ưu
-    df_filtered = df[df["calories"] <= effective_quota]
-    
-    # Bước 3: Cơ chế phòng vệ tối thượng (Nếu bộ lọc quá gắt vẫn bị rỗng)
-    '''if df_filtered.empty and not df.empty:
-        # Tình huống user chọn loại món quá hiếm, ta nới rộng hẳn thêm 150 calo
-        df_filtered = df[df["calories"] <= (effective_quota + 150)]
-        
-        # Nếu vẫn tiếp tục rỗng, lấy ra 15 món có calo thấp nhất hiện có trong nhóm đó
-        if df_filtered.empty:
-            df_filtered = df.sort_values("calories").head(15)'''
-
-    
-
+    df = df[df["calories"] <= calo_quota + 200]
+                 
     # eaten log
     if eaten_ids:
         df = df[~df["food_id"].isin(eaten_ids)]
