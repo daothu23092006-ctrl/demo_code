@@ -13,6 +13,10 @@ st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layo
 st.markdown("""
 <style>
 [data-testid="stAppViewContainer"] { background: #f0f2f5; }
+[data-testid="stHeader"] { 
+    background: transparent !important; 
+    color: inherit !important;
+}
 /*[data-testid="stHeader"] {
     display: none !important;
     height: 0px !important;
