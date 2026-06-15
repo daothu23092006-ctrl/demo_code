@@ -107,9 +107,9 @@ def score_dish(row, meal_target, preferred_sources):
     - 0.10 fiber bonus
     - 0.05 sugar score
     """
-    calo = row["calories_per_person"] or 1
-    protein_ratio = row["protein_per_person"] / calo
-    fat_ratio     = row["fat_per_person"] / calo
+    calo = row["calories"] or 1
+    protein_ratio = row["protein_pp"] / calo
+    fat_ratio     = row["fat_pp"] / calo
 
     target_p = meal_target["protein"] / meal_target["calo"]
     target_f = meal_target["fat"]     / meal_target["calo"]
@@ -120,8 +120,8 @@ def score_dish(row, meal_target, preferred_sources):
 
     preference_score = 1.0 if _source_match(row["protein_sources_str"], preferred_sources) else 0.5
 
-    fiber_score = min((row["fiber_per_person"] or 0) / calo * 100, 1)
-    sugar_score = 1 - min((row["sugar_per_person"] or 0) / calo * 100, 1)
+    fiber_score = min((row["fiber_pp] or 0) / calo * 100, 1)
+    sugar_score = 1 - min((row["sugar_pp"] or 0) / calo * 100, 1)
 
     return (
         0.45 * nutrition_score
@@ -163,10 +163,10 @@ def recommend_meal(meal_id, meal_target, df, diet_type, preferred_sources,
             "food_id":   int(row["food_id"]),
             "dish_name": row["dish_name"],
             "dish_type": row["dish_type"],
-            "calo":      round(row["calories_per_person"]),
-            "protein":   round(row["protein_per_person"], 1),
-            "fat":       round(row["fat_per_person"], 1),
-            "fiber":     round(row["fiber_per_person"], 1),
+            "calo":      round(row["calories_pp"]),
+            "protein":   round(row["protein_pp"], 1),
+            "fat":       round(row["fat_pp"], 1),
+            "fiber":     round(row["fiber_pp"], 1),
             "image_url": row["image_link"],
             "score":     round(row["_score"], 3),
         })
