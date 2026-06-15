@@ -81,6 +81,44 @@ def bmi_info(bmi):
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
+#
+st.markdown("""
+<style>
+/* Style cho container bọc nút trượt */
+.theme-toggle-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: -20px; /* Kéo tiêu đề chính dịch lên sát nút */
+}
+/* Style cho nút bấm gạt giả lập */
+.toggle-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# 2. Tạo 2 cột để đẩy nút trượt sang góc bên phải tiêu đề chính
+top_col1, top_col2 = st.columns([2, 1])
+
+with top_col2:
+    # Checkbox ngầm đổi trạng thái True (Dark) / False (Light)
+    # Dùng st.toggle có key riêng để không bị mất trạng thái khi load trang
+    is_dark = st.toggle("🌙 Mode", value=(st.session_state.theme_mode == "Dark"), label_visibility="collapsed", key="top_theme_toggle")
+    
+    # Cập nhật trạng thái
+    new_theme = "Dark" if is_dark else "Light"
+    if new_theme != st.session_state.theme_mode:
+        st.session_state.theme_mode = new_theme
+        st.rerun()
+#
 st.title("👩‍🍳🍜 Hôm nay ăn gì?")
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
