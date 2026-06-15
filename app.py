@@ -48,9 +48,25 @@ section[data-testid="stSidebar"] { background: #fff; }
     margin-top: 0.75rem;
     display: block;
 }
-footer, #MainMenu { visibility: hidden; }
-[data-testid="stToolbar"] { display: none; }
-[data-testid="stSidebarCollapseButton"] { display: none !important; } /* Giấu nút ẩn << */
+/* 1. Ẩn sạch các thành phần thừa của hệ thống */
+footer, #MainMenu, [data-testid="stToolbar"] { 
+    display: none !important; 
+}
+
+/* 2. BIỆN PHÁP MẠNH: Ép thanh sidebar bên trái phải hiển thị trực diện trên màn hình,
+   vô hiệu hóa hoàn toàn tính năng ẩn thu gọn (Collapse) */
+section[data-testid="stSidebar"] {
+    display: block !important;
+    visibility: visible !important;
+    transform: translate3d(0px, 0px, 0px) !important; /* Ép sidebar nằm cố định ở tọa độ hiển thị */
+    min-width: 250px !important; /* Đảm bảo chiều rộng của sidebar không bị co về 0 */
+}
+
+/* 3. Đẩy nội dung chính sang bên phải để không bị thanh sidebar che khuất */
+[data-testid="stAppViewContainer"] {
+    display: flex !important;
+    flex-direction: row !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
