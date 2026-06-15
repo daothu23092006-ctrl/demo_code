@@ -50,6 +50,9 @@ footer, #MainMenu { visibility: hidden; }
 """, unsafe_allow_html=True)
 
 # Khởi tạo các biến lưu trữ trạng thái hệ thống
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "Light"
+#
 if "profile_done" not in st.session_state:
     st.session_state.profile_done = False
 if "profile" not in st.session_state:
@@ -61,6 +64,95 @@ if "menu_done" not in st.session_state:
 if "user_choices" not in st.session_state:
     st.session_state.user_choices = {}
 
+#
+with st.sidebar:
+    st.markdown("### 🌓 Chế độ nền")
+    
+    # Checkbox ngầm đổi trạng thái True (Dark) / False (Light)
+    is_dark = st.toggle("Kích hoạt chế độ Tối", value=(st.session_state.theme_mode == "Dark"), label_visibility="collapsed")
+    
+    # Cập nhật trạng thái và rerun để render đúng màu CSS ngầm
+    new_theme = "Dark" if is_dark else "Light"
+    if new_theme != st.session_state.theme_mode:
+        st.session_state.theme_mode = new_theme
+        st.rerun()
+
+    # Hiển thị nút trượt đồ họa trực quan tương ứng với trạng thái
+    if st.session_state.theme_mode == "Dark":
+        st.markdown("""
+            <div style="display: flex; align-items: center; gap: 10px; background: #2a2a35; padding: 10px 15px; border-radius: 50px; justify-content: center; border: 1px solid #444;">
+                <span style="font-size: 1.2rem; opacity: 0.3;">☀️</span>
+                <div style="width: 40px; height: 20px; background: #FF6B6B; border-radius: 20px; position: relative;">
+                    <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px;"></div>
+                </div>
+                <span style="font-size: 1.1rem; color: #fff; font-weight: 600;">🌙 Chế độ Tối</span>
+            </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+            <div style="display: flex; align-items: center; gap: 10px; background: #f0f2f5; padding: 10px 15px; border-radius: 50px; justify-content: center; border: 1px solid #e8e8e8;">
+                <span style="font-size: 1.1rem; color: #1a1a1a; font-weight: 600;">☀️ Chế độ Sáng</span>
+                <div style="width: 40px; height: 20px; background: #ccc; border-radius: 20px; position: relative;">
+                    <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px;"></div>
+                </div>
+                <span style="font-size: 1.2rem; opacity: 0.3;">🌙</span>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    st.divider()
+
+# ══════════════════════════════════════════════════════════════════════════════
+# GIỮ CẤU TRÚC PHONG CÁCH VÀ CHÈN THEME THAY ĐỔI THEO TRẠNG THÁI
+# ══════════════════════════════════════════════════════════════════════════════
+# Các thuộc tính chung cho cả 2 giao diện
+common_style = """
+[data-testid="stHeader"] { display: none !important; height: 0px !important; }
+[data-testid="stMain"] > div { padding-top: 2rem !important; }
+.block-container { max-width: 480px !important; padding: 2rem 1rem 2rem !important; margin: 0 auto !important; }
+[data-testid="stRadio"] > div { flex-direction: row !important; flex-wrap: wrap !important; gap: 0.5rem !important; }
+[data-testid="stRadio"] label { border-radius: 50px !important; padding: 0.4rem 1rem !important; font-size: 0.85rem !important; font-weight: 500 !important; cursor: pointer !important; }
+[data-testid="stButton"] > button[kind="primary"] { background: linear-gradient(135deg, #FF6B6B, #FF8E53) !important; color: #fff !important; border: none !important; border-radius: 50px !important; padding: 0.7rem 1.5rem !important; font-size: 1rem !important; font-weight: 600 !important; width: 100% !important; box-shadow: 0 4px 15px rgba(255,107,107,0.35) !important; }
+[data-testid="stSelectbox"] > div > div, [data-testid="stMultiSelect"] > div > div, [data-testid="stNumberInput"] input { border-radius: 14px !important; }
+[data-testid="stNumberInput"] label, [data-testid="stSelectbox"] label { font-size: 1rem !important; font-weight: 700 !important; }
+.field-label { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; margin-top: 0.75rem; display: block; }
+footer, #MainMenu { visibility: hidden; }
+[data-testid="stToolbar"] { display: none; }
+"""
+
+if st.session_state.theme_mode == "Dark":
+    # Các thông số ghi đè sang màu Đêm tối (Nền tối, chữ trắng rực)
+    st.markdown(f"""
+    <style>
+    {common_style}
+    [data-testid="stAppViewContainer"] {{ background: #141419; }}
+    section[data-testid="stSidebar"] {{ background: #1e1e24 !important; border-right: 1px solid #2d2d35; }}
+    [data-testid="stMarkdownContainer"] p, h1, h2, h3, h4, h5, h6, span, label, li {{ color: #ffffff !important; }}
+    
+    [data-testid="stRadio"] label {{ border: 1.5px solid #3f3f4f !important; color: #cccccc !important; background: #2a2a35 !important; }}
+    [data-testid="stRadio"] label:has(input:checked) {{ background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }}
+    [data-testid="stButton"] > button:not([kind="primary"]) {{ border-radius: 50px !important; border: 1.5px solid #3f3f4f !important; background: #2a2a35 !important; color: #ffffff !important; font-size: 0.85rem !important; padding: 0.4rem 1.2rem !important; }}
+    
+    [data-testid="stSelectbox"] > div > div, [data-testid="stMultiSelect"] > div > div, [data-testid="stNumberInput"] input {{ border: 1.5px solid #3f3f4f !important; background: #2a2a35 !important; color: #ffffff !important; }}
+    .field-label {{ color: #ffffff !important; }}
+    [data-testid="stMetricValue"] {{ color: #ffffff !important; }}
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    # Giữ nguyên bản gốc giao diện màu sáng của bạn
+    st.markdown(f"""
+    <style>
+    {common_style}
+    [data-testid="stAppViewContainer"] {{ background: #f0f2f5; }}
+    section[data-testid="stSidebar"] {{ background: #fff; }}
+    [data-testid="stRadio"] label {{ border: 1.5px solid #e8e8e8 !important; padding: 0.4rem 1rem !important; font-size: 0.85rem !important; font-weight: 500 !important; color: #555 !important; background: #fafafa !important; }}
+    [data-testid="stRadio"] label:has(input:checked) {{ background: #FF6B6B !important; border-color: #FF6B6B !important; color: #fff !important; }}
+    [data-testid="stButton"] > button:not([kind="primary"]) {{ border-radius: 50px !important; border: 1.5px solid #e8e8e8 !important; background: #fafafa !important; color: #555 !important; font-size: 0.85rem !important; padding: 0.4rem 1.2rem !important; }}
+    [data-testid="stSelectbox"] > div > div, [data-testid="stMultiSelect"] > div > div, [data-testid="stNumberInput"] input {{ border: 1.5px solid #f0f0f0 !important; background: #fafafa !important; }}
+    [data-testid="stNumberInput"] label, [data-testid="stSelectbox"] label {{ color: #1a1a1a !important; }}
+    .field-label {{ color: #1a1a1a; }}
+    </style>
+    """, unsafe_allow_html=True)
+#
 BMI_RANGES = [
     (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
     (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
