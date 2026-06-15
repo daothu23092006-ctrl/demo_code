@@ -98,27 +98,7 @@ with st.sidebar:
         st.session_state.theme_mode = new_theme
         st.rerun()
 
-    # Hiển thị nút trượt đồ họa trực quan tương ứng với trạng thái
-    if st.session_state.theme_mode == "Dark":
-        st.markdown("""
-            <div style="display: flex; align-items: center; gap: 10px; background: #2a2a35; padding: 10px 15px; border-radius: 50px; justify-content: center; border: 1px solid #444;">
-                <span style="font-size: 1.2rem; opacity: 0.3;">☀️</span>
-                <div style="width: 40px; height: 20px; background: #FF6B6B; border-radius: 20px; position: relative;">
-                    <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px;"></div>
-                </div>
-                <span style="font-size: 1.1rem; color: #fff; font-weight: 600;">🌙 Chế độ Tối</span>
-            </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown("""
-            <div style="display: flex; align-items: center; gap: 10px; background: #f0f2f5; padding: 10px 15px; border-radius: 50px; justify-content: center; border: 1px solid #e8e8e8;">
-                <span style="font-size: 1.1rem; color: #1a1a1a; font-weight: 600;">☀️ Chế độ Sáng</span>
-                <div style="width: 40px; height: 20px; background: #ccc; border-radius: 20px; position: relative;">
-                    <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px;"></div>
-                </div>
-                <span style="font-size: 1.2rem; opacity: 0.3;">🌙</span>
-            </div>
-        """, unsafe_allow_html=True)
+    
         
     st.divider()
 
