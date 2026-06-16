@@ -215,7 +215,7 @@ else:
             target = targets[meal_id]
             icon = MEAL_ICONS.get(meal_id, "🍽️")
 
-            st.markdown(f"**{icon} Bữa {meal_id}** &nbsp;·&nbsp; {target['calo']} kcal &nbsp;·&nbsp; {target['protein']}g protein", unsafe_allow_html=True)
+            st.markdown(f"#### {icon} Bữa {meal_id} &nbsp;<span style='font-size:0.85rem;font-weight:400;color:#aaa'>· {target['calo']} kcal · {target['protein']}g protein</span>", unsafe_allow_html=True)
 
             if not dishes:
                 st.warning(f"Không tìm được món phù hợp cho bữa {meal_id}.")
@@ -361,6 +361,8 @@ else:
             if not preferred_sources:
                 st.warning("Bạn chưa chọn nguồn đạm - hệ thống sẽ gợi ý tất cả các loại.")
 
+        st.markdown('<span class="field-label">🌄 Bữa sáng</span>', unsafe_allow_html=True)
+        st.caption("Món độc lập (bún, phở, cháo...)")
         col1, col2 = st.columns(2)
         with col1:
             st.markdown('<span class="field-label">☀️ Bữa trưa</span>', unsafe_allow_html=True)
