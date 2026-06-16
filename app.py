@@ -168,7 +168,21 @@ st.divider()
 if not st.session_state.profile_done:
     st.markdown("#### 📋 Hồ sơ sức khoẻ")
     st.caption("Nhập thông tin sức khoẻ của bạn để nhận gợi ý thực đơn phù hợp.")
+    
+    row1_col1, row1_col2 = st.columns(2)
+    with row1_col1:
+        height = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=250.0, value=165.0, step=0.5)
+    with row1_col2:
+        age = st.number_input("Tuổi", min_value=20, max_value=49, value=22)
 
+    # --- HÀNG 2: Cân nặng và Mức độ vận động ---
+    row2_col1, row2_col2 = st.columns(2)
+    with row2_col1:
+        weight = st.number_input("Cân nặng (kg)",  min_value=30.0,  max_value=200.0, value=60.0,  step=0.5)
+    with row2_col2:
+        activity = st.selectbox("Mức độ vận động",
+                      ["Ít vận động", "Vận động nhẹ", "Vận động vừa", "Vận động nhiều"])
+    '''
     col1, col2 = st.columns(2)
     with col1:
         height = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=250.0, value=165.0, step=0.5)
@@ -177,7 +191,7 @@ if not st.session_state.profile_done:
         age = st.number_input("Tuổi", min_value=20, max_value=49, value=22)
         activity = st.selectbox("Mức độ vận động",
                       ["Ít vận động", "Vận động nhẹ", "Vận động vừa", "Vận động nhiều"])
-
+    '''
     st.markdown('<span class="field-label">⚧ Giới tính</span>', unsafe_allow_html=True)
     gender = st.radio("", ["Nam", "Nữ"], horizontal=True, key="gender_radio", label_visibility="collapsed")
 
