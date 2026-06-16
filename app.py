@@ -78,6 +78,18 @@ common_style = """
 footer, #MainMenu { visibility: hidden; }
 [data-testid="stToolbar"] { display: none; }
 [data-testid="stSidebarCollapseButton"] { display: none !important; }
+//
+[data-testid="id-number_input"] > label, 
+[data-testid="stSelectbox"] label {
+    min-height: 24px !important; /* Ép phần nhãn chữ có chiều cao tối thiểu bằng nhau */
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Đảm bảo chiều cao widget đồng bộ */
+div[data-testid="stColumn"] > div {
+    vertical-align: top !important;
+}
 
 /* Ép cột chứa nút gạt nằm chuẩn ở góc trên bên phải dòng tiêu đề */
 div[data-testid="stColumn"]:nth-of-type(2) {
