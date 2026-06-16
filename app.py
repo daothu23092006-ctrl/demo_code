@@ -74,7 +74,7 @@ def bmi_info(bmi):
             return label, goals, icon
     return "Béo phì", ["Giảm cân"], "🔴"
 
-ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Đạm thực vật", "Khác"]
+ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
 st.title("👩‍🍳🍜 Hôm nay ăn gì?")
@@ -168,22 +168,6 @@ else:
             st.markdown(f"**BMI:** {bmi:.1f} ({bmi_class}) &nbsp;·&nbsp; **Mục tiêu calo:** {tdee_adj_preview:,.0f} kcal")
             st.markdown(f"**Chế độ ăn:** {choices.get('diet_type')} &nbsp;·&nbsp; **Nguồn đạm:** {', '.join(choices.get('preferred_sources', []))}")
             st.markdown(f"**Bữa trưa:** {choices.get('lunch_mode')} &nbsp;·&nbsp; **Bữa tối:** {choices.get('dinner_mode')} &nbsp;·&nbsp; **Bữa phụ:** {choices.get('snack_mode')}")
-            
-            st.divider()
-            
-            # --- SỬA ĐỔI 1: CHIA ĐÔI CỘT ĐỂ ĐẶT HAI NÚT SONG SONG NHAU ---
-            btn_col1, btn_col2 = st.columns(2)
-            with btn_col1:
-                if st.button("🔄 Thay đổi bộ lọc ăn uống", use_container_width=True):
-                    st.session_state.menu_done = False
-                    st.rerun()
-            with btn_col2:
-                if st.button("✏️ Cập nhật lại hồ sơ", use_container_width=True):
-                    st.session_state.profile_done = False
-                    st.session_state.menu_done = False
-                    st.session_state.show_suggestions = False
-                    st.session_state.user_choices = {}
-                    st.rerun()
 
         st.divider()
 
@@ -330,15 +314,6 @@ else:
   <div style="font-size:0.62rem;color:#aaa;margin-top:0.1rem">{lbl}</div>
 </div>
 """, unsafe_allow_html=True)
-
-        # --- SỬA ĐỔI 2: THÊM NÚT SỬA HỒ SƠ NGAY TẠI MÀN HÌNH BỘ LỌC ---
-        st.write("")
-        if st.button("✏️ Cập nhật lại hồ sơ", use_container_width=True):
-            st.session_state.profile_done = False
-            st.session_state.menu_done = False
-            st.session_state.show_suggestions = False
-            st.session_state.user_choices = {}
-            st.rerun()
 
         st.divider()
 
