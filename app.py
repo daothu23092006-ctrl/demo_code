@@ -144,12 +144,6 @@ else:
         st.metric("BMI", f"{bmi_s:.1f}", bmi_cls_s)
         st.metric("TDEE mục tiêu", f"{tdee_adj_s:.0f} kcal")
         st.divider()
-        if st.button("✏️ Cập nhật hồ sơ", use_container_width=True):
-            st.session_state.profile_done = False
-            st.session_state.menu_done = False
-            st.session_state.show_suggestions = False
-            st.session_state.user_choices = {}
-            st.rerun()
 
     bmi  = calc_bmi(p["weight"], p["height"])
     bmr  = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
