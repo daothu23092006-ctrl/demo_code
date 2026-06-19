@@ -12,7 +12,7 @@ from engine import RecommendationEngine
 
 # Giữ nguyên các hàm bổ trợ giao diện cũ để không lỗi render
 BMI_RANGES = [
-    (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                     "🔴"),
+    (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                      "🔴"),
     (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
     (18.5, 23.0, "Bình thường",          ["Giảm cân", "Duy trì", "Tăng cân"], "🟢"),
     (23.0, 25.0, "Thừa cân",             ["Giảm cân", "Duy trì"],             "🟠"),
@@ -76,31 +76,45 @@ def get_recommendation_engine():
         )
     return RecommendationEngine(food_db, artifacts)
 
-# Các hàm tính toán chỉ số sức khỏe chuyển sang dùng hàm chuẩn hóa của Vifoodrec
+# Các hàm tính toán chỉ số sức khỏe dựa trên core_logic của Vifoodrec để hiển thị chuẩn xác trên UI
 def calc_bmi(w, h):
     return w / ((h / 100.0) ** 2)
 
-def calc_bmr(w, h, a, g):
-    # Tạo profile ảo để tái sử dụng module core_logic tính toán chính xác tuyệt đối
-    gender_en = MAP_GENDER.get(g, "male")
-    u = UserProfile(
-        user_id="TEMP", persona_id="TEMP", gender=gender_en,
+def _get_temp_user(w, h, a, g, activity="Ít vận động", goal="Duy trì"):
+    """Hàm bổ trợ tạo nhanh một UserProfile để đồng bộ tính toán sinh lý tự động"""
+    return UserProfile(
+        user_id="TEMP", persona_id="TEMP", 
+        gender=MAP_GENDER.get(g, "male"),
         age_group="20-29" if a < 30 else "30-49", age=a, height_cm=h, weight_kg=w,
-        bmi=calc_bmi(w, h), bmi_group="normal", activity_level="sedentary", goal="maintain_weight",
+        bmi=calc_bmi(w, h), bmi_group="normal", 
+        activity_level=MAP_ACTIVITY.get(activity, "sedentary"), 
+        goal=MAP_GOAL.get(goal, "maintain_weight"),
         bmr=0.0, tdee=0.0, tdee_final=0.0, tdee_clamped=False
     )
+
+def calc_bmr(w, h, a, g):
+    u = _get_temp_user(w, h, a, g)
     return u.bmr
 
 def calc_tdee(bmr, activity):
-    # Logic tính toán tự động nằm hoàn toàn trong quá trình khởi tạo UserProfile của core_logic
-    return bmr # Hàm bọc giữ nguyên tương thích giao diện
+    # Trả về giá trị tính toán tdee từ đối tượng UserProfile tạm thời dựa theo mức độ vận động
+    # Để tương thích giao diện cũ nhận vào bmr và chuỗi hoạt động tiếng Việt
+    for k, v in MAP_ACTIVITY.items():
+        if k == activity or v == activity:
+            activity = k
+            break
+    # Mô phỏng nhanh hệ số vận động để giao diện hiển thị trước khi lưu profile chính thức
+    factors = {"Ít vận động": 1.2, "Vận động nhẹ": 1.375, "Vận động vừa": 1.55, "Vận động nhiều": 1.725}
+    return bmr * factors.get(activity, 1.2)
 
 def adjust_tdee(tdee, goal, gender):
-    # Tính toán TDEE cuối cùng sau khi cộng/trừ calo theo mục tiêu tăng/giảm cân
-    return tdee # Trả về biến gốc, logic thật sẽ được xử lý tự động bởi object UserProfile bên dưới
+    if goal == "Giảm cân":
+        return max(1200.0 if gender == "Nữ" else 1500.0, tdee - 500.0)
+    elif goal == "Tăng cân":
+        return tdee + 500.0
+    return tdee
 
 def calc_meal_targets(tdee_adj, goal, has_snack):
-    # Đóng vai trò làm hàm giữ cấu trúc để giao diện đọc chỉ số kcal/protein hiển thị tiêu đề bữa ăn
     return None 
 
 # --- BẮT ĐẦU UI STREAMLIT (GIỮ NGUYÊN HOÀN TOÀN PHẦN RENDER GIAO DIỆN VÀ CSS) ---
@@ -142,7 +156,7 @@ section[data-testid="stSidebar"] { background: #fff; }
     display: block;
 }
 footer, #MainMenu { visibility: hidden; }
-[data-testid="stToolbar"] { display: visible; 
+[data-testid="stToolbar"] { display: visible; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -277,7 +291,6 @@ else:
                 targets[m_id] = cl.compute_meal_target(user_obj, daily_pref_obj, m_id)
 
             # Gọi Engine gợi ý thực đơn (Mặc định cho Cold Start bằng cách truyền danh sách rỗng vào history log)
-            # Hệ thống sẽ tự động điều hướng sang nhánh Rule-Based & Popularity
             suggestions = {}
             for m_id in ["breakfast", "lunch", "dinner", "snack"]:
                 if m_id == "snack" and not daily_pref_obj.has_snack:
@@ -295,7 +308,6 @@ else:
                 )
 
                 if rec_results:
-                    # Lấy ngẫu nhiên hoặc lấy Top 1 để hiển thị mâm cơm tương thích nút "Gợi ý lại"
                     chosen_res = rec_results[0]
                     meal_obj = chosen_res.meal
                     
@@ -376,18 +388,19 @@ else:
             "Bình thường":          ("#e6f9ef", "#27ae60"),
             "Thiếu cân nhẹ":        ("#fff9e6", "#e67e22"),
             "Thiếu cân (vừa/nặng)": ("#fde8e8", "#e74c3c"),
-            "Thừa cân":             ("#fef0e6", "#e67e22"),
-            "Béo phì":              ("#fde8e8", "#e74c3c"),
+            "Thừa cân":              ("#fef0e6", "#e67e22"),
+            "Béo phì":               ("#fde8e8", "#e74c3c"),
         }
         badge_bg, badge_color = badge_cfg.get(bmi_class, ("#eee", "#555"))
         bmi_pct = max(0, min(100, int((bmi - 14) / (32 - 14) * 100)))
         gender_icon = "♂️" if p["gender"] == "Nam" else "♀️"
 
+        # Đã đóng ngoặc nhọn đầy đủ cho dictionary trước khi gọi phương thức .get()
         delta_label = {
             "Giảm cân": f"− {tdee - tdee_adj_preview:.0f} Calo so với TDEE",
             "Tăng cân": f"+ {tdee_adj_preview - tdee:.0f} Calo so với TDEE",
-            "Duy trì":  "= Duy trì cân nặng",
-        .get(p["goal"], "")
+            "Duy trì":  "= Duy trì cân nặng"
+        }.get(p["goal"], "")
 
         st.markdown("#### 🧠 Chỉ số sức khoẻ")
 
