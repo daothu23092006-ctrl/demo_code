@@ -1,123 +1,12 @@
 # Nạp thư viện streamlit 
 import streamlit as st
-import pickle
-import os
-import numpy as np
-
-# Nạp các hàm cấu trúc dữ liệu và logic lõi từ Vifoodrec
-from models import UserProfile, DailyPreference, Dish
-from loaders import load_food_db, normalize_diet_type
-import core_logic as cl
-from engine import RecommendationEngine
-
-# Giữ nguyên các hàm bổ trợ giao diện cũ để không lỗi render
-BMI_RANGES = [
-    (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                      "🔴"),
-    (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
-    (18.5, 23.0, "Bình thường",          ["Giảm cân", "Duy trì", "Tăng cân"], "🟢"),
-    (23.0, 25.0, "Thừa cân",             ["Giảm cân", "Duy trì"],             "🟠"),
-    (25.0, 999,  "Béo phì",              ["Giảm cân"],                        "🔴"),
-]
-
-def bmi_info(bmi):
-    for lo, hi, label, goals, icon in BMI_RANGES:
-        if lo <= bmi < hi:
-            return label, goals, icon
-    return "Béo phì", ["Giảm cân"], "🔴"
-
-# Ánh xạ tên giao diện sang chuẩn database phục vụ truy vấn
-MAP_GENDER = {"Nam": "male", "Nữ": "female"}
-MAP_ACTIVITY = {
-    "Ít vận động": "sedentary",
-    "Vận động nhẹ": "light",
-    "Vận động vừa": "moderate",
-    "Vận động nhiều": "active"
-}
-MAP_GOAL = {
-    "Giảm cân": "lose_weight",
-    "Duy trì": "maintain_weight",
-    "Tăng cân": "gain_weight"
-}
-MAP_PROTEIN = {
-    "Bò": "bo", "Heo": "heo", "Gà": "ga", "Vịt": "vit",
-    "Cá": "ca", "Hải sản": "hai_san", "Trứng": "trung", "Khác": "khac"
-}
-MAP_MODE = {
-    "Cơm + món": 1,                      # rice_meal
-    "Món độc lập (bún, phở...)": 0,       # standalone
-    "Món độc lập": 0
-}
-MAP_SNACK = {
-    "Không có": None,
-    "Đồ uống": "đồ uống",
-    "Ăn vặt": "đồ ăn vặt",
-    "Đồ ngọt": "đồ ngọt"
-}
-
-# Khởi tạo hoặc load Cache cho Engine giải thuật (Chỉ load 1 lần để tối ưu tốc độ request)
-@st.cache_resource
-def get_recommendation_engine():
-    # Đọc danh sách món ăn từ file dishname_final.csv của bạn
-    food_db = load_food_db("dishname_final.csv")
-    
-    # Đọc file artifacts mẫu để chạy các nhánh fallback rule-based của Cold Start
-    if os.path.exists("artifacts_train.pkl"):
-        with open("artifacts_train.pkl", "rb") as f:
-            artifacts = pickle.load(f)
-    else:
-        # Hỗ trợ tự động tạo Artifact rỗng nếu chưa chạy pipeline để tránh crash app
-        from artifacts import Artifacts
-        artifacts = Artifacts(
-            food_db_by_id={d.food_id: d for d in food_db},
-            all_feature_values=cl.get_all_feature_values(food_db),
-            user_profile_vectors={},
-            similar_users_index={},
-            popular_dishes_by_group={}
-        )
-    return RecommendationEngine(food_db, artifacts)
-
-# Các hàm tính toán chỉ số sức khỏe dựa trên core_logic của Vifoodrec để hiển thị chuẩn xác trên UI
-def calc_bmi(w, h):
-    return w / ((h / 100.0) ** 2)
-
-def _get_temp_user(w, h, a, g, activity="Ít vận động", goal="Duy trì"):
-    """Hàm bổ trợ tạo nhanh một UserProfile để đồng bộ tính toán sinh lý tự động"""
-    return UserProfile(
-        user_id="TEMP", persona_id="TEMP", 
-        gender=MAP_GENDER.get(g, "male"),
-        age_group="20-29" if a < 30 else "30-49", age=a, height_cm=h, weight_kg=w,
-        bmi=calc_bmi(w, h), bmi_group="normal", 
-        activity_level=MAP_ACTIVITY.get(activity, "sedentary"), 
-        goal=MAP_GOAL.get(goal, "maintain_weight"),
-        bmr=0.0, tdee=0.0, tdee_final=0.0, tdee_clamped=False
-    )
-
-def calc_bmr(w, h, a, g):
-    u = _get_temp_user(w, h, a, g)
-    return u.bmr
-
-def calc_tdee(bmr, activity):
-    # Trả về giá trị tính toán tdee từ đối tượng UserProfile tạm thời dựa theo mức độ vận động
-    # Để tương thích giao diện cũ nhận vào bmr và chuỗi hoạt động tiếng Việt
-    for k, v in MAP_ACTIVITY.items():
-        if k == activity or v == activity:
-            activity = k
-            break
-    # Mô phỏng nhanh hệ số vận động để giao diện hiển thị trước khi lưu profile chính thức
-    factors = {"Ít vận động": 1.2, "Vận động nhẹ": 1.375, "Vận động vừa": 1.55, "Vận động nhiều": 1.725}
-    return bmr * factors.get(activity, 1.2)
-
-def adjust_tdee(tdee, goal, gender):
-    if goal == "Giảm cân":
-        return max(1200.0 if gender == "Nữ" else 1500.0, tdee - 500.0)
-    elif goal == "Tăng cân":
-        return tdee + 500.0
-    return tdee
-
-def calc_meal_targets(tdee_adj, goal, has_snack):
-    return None 
-
-# --- BẮT ĐẦU UI STREAMLIT (GIỮ NGUYÊN HOÀN TOÀN PHẦN RENDER GIAO DIỆN VÀ CSS) ---
+# Nạp các hàm tính toàn chỉ số sức khỏe từ calculator.py
+from calculator import (
+    calc_bmi, bmi_label, calc_bmr, calc_tdee,
+    adjust_tdee, calc_meal_targets,
+)
+# Nạp hàm gợi ý thực đơn từ recommender.py
+from recommender import recommend_day
 
 st.set_page_config(page_title="Hôm nay ăn gì?", page_icon="👩‍🍳", layout="centered") 
 
@@ -156,7 +45,7 @@ section[data-testid="stSidebar"] { background: #fff; }
     display: block;
 }
 footer, #MainMenu { visibility: hidden; }
-[data-testid="stToolbar"] { display: visible; }
+[data-testid="stToolbar"] { display: visible; 
 </style>
 """, unsafe_allow_html=True)
 
@@ -171,6 +60,20 @@ if "menu_done" not in st.session_state:
 if "user_choices" not in st.session_state:
     st.session_state.user_choices = {}
 
+BMI_RANGES = [
+    (0,    17.0, "Thiếu cân (vừa/nặng)", ["Tăng cân"],                        "🔴"),
+    (17.0, 18.5, "Thiếu cân nhẹ",        ["Tăng cân", "Duy trì"],             "🟡"),
+    (18.5, 23.0, "Bình thường",          ["Giảm cân", "Duy trì", "Tăng cân"], "🟢"),
+    (23.0, 25.0, "Thừa cân",             ["Giảm cân", "Duy trì"],             "🟠"),
+    (25.0, 999,  "Béo phì",              ["Giảm cân"],                        "🔴"),
+]
+
+def bmi_info(bmi):
+    for lo, hi, label, goals, icon in BMI_RANGES:
+        if lo <= bmi < hi:
+            return label, goals, icon
+    return "Béo phì", ["Giảm cân"], "🔴"
+
 ALL_PROTEIN_SOURCES = ["Bò", "Heo", "Gà", "Vịt", "Cá", "Hải sản", "Trứng", "Khác"]
 VEGAN_SOURCES = ["Đạm thực vật"]
 
@@ -178,6 +81,10 @@ st.title("👩‍🍳🍜 Hôm nay ăn gì?")
 st.caption("Gợi ý thực đơn Việt Nam theo mục tiêu dinh dưỡng")
 st.divider()
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BƯỚC 1 - HỒ SƠ NGƯỜI DÙNG
+# ══════════════════════════════════════════════════════════════════════════════
 if not st.session_state.profile_done:
     st.markdown("#### 📋 Hồ sơ sức khoẻ")
     st.caption("Nhập thông tin sức khoẻ của bạn để nhận gợi ý thực đơn phù hợp.")
@@ -194,7 +101,7 @@ if not st.session_state.profile_done:
     st.markdown('<span class="field-label">⚧ Giới tính</span>', unsafe_allow_html=True)
     gender = st.radio("", ["Nam", "Nữ"], horizontal=True, key="gender_radio", label_visibility="collapsed")
 
-    bmi_temp = weight / ((height / 100.0) ** 2)
+    bmi_temp = calc_bmi(weight, height)
     bmi_class, allowed_goals, bmi_icon = bmi_info(bmi_temp)
     st.info(f"{bmi_icon} **BMI: {bmi_temp:.1f}** — {bmi_class}\n\nMục tiêu phù hợp cho bạn: **{' / '.join(allowed_goals)}**")
 
@@ -210,29 +117,11 @@ if not st.session_state.profile_done:
         st.session_state.profile_done = True
         st.rerun()
 
+# ══════════════════════════════════════════════════════════════════════════════
+# BƯỚC 2 - LỰA CHỌN BỘ LỌC VÀ HIỂN THỊ THỰC ĐƠN
+# ══════════════════════════════════════════════════════════════════════════════
 else:
     p = st.session_state.profile
-
-    # Tạo UserProfile thật chuẩn cấu trúc Vifoodrec để tính sinh lý tự động
-    user_obj = UserProfile(
-        user_id="U_COLD",
-        persona_id="cold_start_persona",
-        gender=MAP_GENDER[p["gender"]],
-        age_group="20-29" if p["age"] < 30 else "30-49",
-        age=p["age"],
-        height_cm=p["height"],
-        weight_kg=p["weight"],
-        bmi=p["weight"] / ((p["height"] / 100.0) ** 2),
-        bmi_group="normal", # Sẽ tự động chuẩn hóa lại trong class
-        activity_level=MAP_ACTIVITY[p["activity"]],
-        goal=MAP_GOAL[p["goal"]],
-        bmr=0.0, tdee=0.0, tdee_final=0.0, tdee_clamped=False
-    )
-
-    bmi = user_obj.bmi
-    tdee = user_obj.tdee
-    tdee_adj_preview = user_obj.tdee_final
-    bmi_class, _, bmi_icon = bmi_info(bmi)
 
     with st.sidebar:
         st.markdown("### 👤 Hồ sơ của bạn")
@@ -246,92 +135,53 @@ else:
 | Hoạt động | {p['activity']} |
 | Mục tiêu | {p['goal']} |
 """)
+        bmi_s = calc_bmi(p["weight"], p["height"])
+        bmi_cls_s, _, _ = bmi_info(bmi_s)
+        bmr_s = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
+        tdee_s = calc_tdee(bmr_s, p["activity"])
+        tdee_adj_s = adjust_tdee(tdee_s, p["goal"], p["gender"])
         st.divider()
-        st.metric("BMI", f"{bmi:.1f}", bmi_class)
-        st.metric("TDEE mục tiêu", f"{tdee_adj_preview:.0f} kcal")
+        st.metric("BMI", f"{bmi_s:.1f}", bmi_cls_s)
+        st.metric("TDEE mục tiêu", f"{tdee_adj_s:.0f} kcal")
         st.divider()
 
+    bmi  = calc_bmi(p["weight"], p["height"])
+    bmr  = calc_bmr(p["weight"], p["height"], p["age"], p["gender"])
+    tdee = calc_tdee(bmr, p["activity"])
+    tdee_adj_preview = adjust_tdee(tdee, p["goal"], p["gender"])
+    bmi_class, _, bmi_icon = bmi_info(bmi)
+
     # -------------------------------------------------------------------------
-    # TRƯỜNG HỢP 2A: ĐÃ NHẤN NÚT GỢI Ý -> GỌI ENGINE RECOMENDER ĐỂ XỬ LÝ
+    # TRƯỜNG HỢP 2A: ĐÃ NHẤN NÚT GỢI Ý -> ĐỌC DỮ LIỆU TỪ "user_choices" ĐỂ HIỂN THỊ
     # -------------------------------------------------------------------------
     if st.session_state.menu_done:
         choices = st.session_state.user_choices
 
+        # Gom gọn dữ liệu cơ thể và bộ lọc cũ lại thành một khối đóng/mở (Expander)
         with st.expander("📊 Xem lại Chỉ số sức khoẻ & Bộ lọc đã chọn", expanded=False):
             st.markdown(f"**BMI:** {bmi:.1f} ({bmi_class}) &nbsp;·&nbsp; **Mục tiêu calo:** {tdee_adj_preview:,.0f} kcal")
             st.markdown(f"**Chế độ ăn:** {choices.get('diet_type')} &nbsp;·&nbsp; **Nguồn đạm:** {', '.join(choices.get('preferred_sources', []))}")
             st.markdown(f"**Bữa trưa:** {choices.get('lunch_mode')} &nbsp;·&nbsp; **Bữa tối:** {choices.get('dinner_mode')} &nbsp;·&nbsp; **Bữa phụ:** {choices.get('snack_mode')}")
 
         st.divider()
-        st.success(f"💡 Mục tiêu hôm nay: **{tdee_adj_preview:,.0f} kcal**")
+
+        # Render trang kết quả gợi ý món ăn mới từ dữ liệu an toàn trong choices
+        tdee_adj  = adjust_tdee(tdee, p["goal"], p["gender"])
+        has_snack = choices.get('snack_mode') != "Không có"
+        targets   = calc_meal_targets(tdee_adj, p["goal"], has_snack)
+
+        st.success(f"💡 Mục tiêu hôm nay: **{tdee_adj:,.0f} kcal**")
 
         with st.spinner("Đang tìm món phù hợp..."):
-            # Khởi tạo Engine giải thuật
-            engine = get_recommendation_engine()
-
-            # Chuyển đổi bộ lọc người dùng sang Object DailyPreference chuẩn
-            pref_sources_en = [MAP_PROTEIN[s] for s in choices.get('preferred_sources', []) if s in MAP_PROTEIN]
-            if choices.get('diet_type') == "Chay":
-                pref_sources_en = ["dam_thuc_vat"]
-
-            daily_pref_obj = DailyPreference(
-                user_id="U_COLD",
-                date=1, # Ngày mặc định khi test demo
-                diet_type=normalize_diet_type(choices.get('diet_type')),
-                protein_sources=pref_sources_en,
-                lunch_mode=MAP_MODE[choices.get('lunch_mode')],
-                dinner_mode=MAP_MODE[choices.get('dinner_mode')],
-                has_snack=choices.get('snack_mode') != "Không có",
-                snack_label=MAP_SNACK.get(choices.get('snack_mode'))
+            suggestions = recommend_day(
+                meal_targets=targets,
+                diet_type=choices.get('diet_type'),
+                preferred_sources=choices.get('preferred_sources'),
+                snack_label=choices.get('snack_mode'),
+                lunch_mode=choices.get('lunch_mode'),
+                dinner_mode=choices.get('dinner_mode'),
             )
 
-            # Tính toán chỉ tiêu dinh dưỡng từng bữa ăn dựa trên core_logic thật của hệ thống
-            targets = {}
-            for m_id in ["breakfast", "lunch", "dinner", "snack"]:
-                targets[m_id] = cl.compute_meal_target(user_obj, daily_pref_obj, m_id)
-
-            # Gọi Engine gợi ý thực đơn (Mặc định cho Cold Start bằng cách truyền danh sách rỗng vào history log)
-            suggestions = {}
-            for m_id in ["breakfast", "lunch", "dinner", "snack"]:
-                if m_id == "snack" and not daily_pref_obj.has_snack:
-                    continue
-                
-                # Gọi hàm gợi ý của RecommendationEngine
-                rec_results = engine.recommend_meal(
-                    user=user_obj,
-                    daily_pref=daily_pref_obj,
-                    meal_id=m_id,
-                    meal_target=targets[m_id],
-                    eaten_log=[], # Rỗng hoàn toàn đại diện cho Cold Start
-                    day=1,
-                    top_k=5
-                )
-
-                if rec_results:
-                    chosen_res = rec_results[0]
-                    meal_obj = chosen_res.meal
-                    
-                    # Chuyển đổi dữ liệu bữa ăn (Meal) thành danh sách các món ăn khớp với cấu trúc UI
-                    dish_list = []
-                    for d in meal_obj.dishes:
-                        if d.dish_type == "rice": # Bỏ qua hiển thị dòng text cơm trắng nếu là cơm nạp calo nền
-                            continue
-                        dish_list.append({
-                            "dish_name": d.dish_name.title(),
-                            "dish_type": d.dish_type.upper(),
-                            "calo": int(d.calories),
-                            "protein": round(d.protein_pp, 1),
-                            "fat": round(d.fat_pp, 1),
-                            "fiber": round(d.fiber_pp, 1),
-                            "score": chosen_res.score,
-                            "image_url": getattr(d, 'image_link', None) # Đọc link ảnh từ database thật
-                        })
-                    suggestions[m_id] = dish_list
-                else:
-                    suggestions[m_id] = []
-
-        # Đồng bộ tên hiển thị giữa ID bữa ăn trong Database và Giao diện UI
-        UI_MEAL_MAP = {"breakfast": "Sáng", "lunch": "Trưa", "dinner": "Tối", "snack": "Phụ"}
         MEAL_ICONS = {"Sáng": "🌄", "Trưa": "☀️", "Tối": "🌙", "Phụ": "🍎"}
 
         def score_color(s):
@@ -339,12 +189,11 @@ else:
             if s >= 0.55: return "#f39c12"
             return "#e74c3c"
 
-        for db_meal_id, dishes in suggestions.items():
-            meal_id = UI_MEAL_MAP[db_meal_id]
-            target = targets[db_meal_id]
+        for meal_id, dishes in suggestions.items():
+            target = targets[meal_id]
             icon = MEAL_ICONS.get(meal_id, "🍽️")
 
-            st.markdown(f"#### {icon} Bữa {meal_id} &nbsp;<span style='font-size:0.85rem;font-weight:400;color:#aaa'>· {int(target.calo_quota)} kcal · {int(target.protein_g_target)}g protein</span>", unsafe_allow_html=True)
+            st.markdown(f"#### {icon} Bữa {meal_id} &nbsp;<span style='font-size:0.85rem;font-weight:400;color:#aaa'>· {target['calo']} kcal · {target['protein']}g protein</span>", unsafe_allow_html=True)
 
             if not dishes:
                 st.warning(f"Không tìm được món phù hợp cho bữa {meal_id}.")
@@ -376,7 +225,16 @@ else:
 
             st.write("")
 
+       # with st.expander("🔧 Debug — meal_targets & filters"):
+       #     st.json({
+       #         "tdee_final": round(tdee_adj, 1),
+       #         "meal_targets": targets,
+       #         "filters": choices,
+           #    })
+
+
         st.write("") 
+        # Khi nhấn nút này, hệ thống sẽ rerun và gọi lại hàm gợi ý ngẫu nhiên món khác dựa trên bộ lọc đã chọn trong choices
         if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
             st.rerun()
 
@@ -388,18 +246,17 @@ else:
             "Bình thường":          ("#e6f9ef", "#27ae60"),
             "Thiếu cân nhẹ":        ("#fff9e6", "#e67e22"),
             "Thiếu cân (vừa/nặng)": ("#fde8e8", "#e74c3c"),
-            "Thừa cân":              ("#fef0e6", "#e67e22"),
-            "Béo phì":               ("#fde8e8", "#e74c3c"),
+            "Thừa cân":             ("#fef0e6", "#e67e22"),
+            "Béo phì":              ("#fde8e8", "#e74c3c"),
         }
         badge_bg, badge_color = badge_cfg.get(bmi_class, ("#eee", "#555"))
         bmi_pct = max(0, min(100, int((bmi - 14) / (32 - 14) * 100)))
         gender_icon = "♂️" if p["gender"] == "Nam" else "♀️"
 
-        # Đã đóng ngoặc nhọn đầy đủ cho dictionary trước khi gọi phương thức .get()
         delta_label = {
             "Giảm cân": f"− {tdee - tdee_adj_preview:.0f} Calo so với TDEE",
             "Tăng cân": f"+ {tdee_adj_preview - tdee:.0f} Calo so với TDEE",
-            "Duy trì":  "= Duy trì cân nặng"
+            "Duy trì":  "= Duy trì cân nặng",
         }.get(p["goal"], "")
 
         st.markdown("#### 🧠 Chỉ số sức khoẻ")
@@ -488,6 +345,7 @@ else:
 
         st.write("")
         
+        # Ngay khi bấm nút, "đóng băng" toàn bộ lựa chọn người dùng đưa vào state an toàn trước khi ẩn widget
         if st.button("🍽️ Gợi ý thực đơn hôm nay", use_container_width=True, type="primary"):
             st.session_state.user_choices = {
                 "diet_type": diet_type,
