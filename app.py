@@ -387,7 +387,7 @@ else:
             "Giảm cân": f"− {tdee - tdee_adj_preview:.0f} Calo so với TDEE",
             "Tăng cân": f"+ {tdee_adj_preview - tdee:.0f} Calo so với TDEE",
             "Duy trì":  "= Duy trì cân nặng",
-        .get(p["goal"], "")
+        .get(p["goal"], "")}
 
         st.markdown("#### 🧠 Chỉ số sức khoẻ")
 
