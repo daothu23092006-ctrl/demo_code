@@ -180,16 +180,20 @@ if not st.session_state.profile_done:
     st.markdown("#### 📋 Hồ sơ sức khoẻ")
     st.caption("Nhập thông tin sức khoẻ của bạn để nhận gợi ý thực đơn phù hợp.")
 
+    _prev = st.session_state.profile  # giữ giá trị cũ nếu đang sửa hồ sơ
+
     col1, col2 = st.columns(2)
     with col1:
-        height = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=250.0, value=165.0, step=0.5)
-        weight = st.number_input("Cân nặng (kg)", min_value=30.0, max_value=200.0, value=60.0, step=0.5)
+        height = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=250.0, value=_prev.get("height", 165.0), step=0.5)
+        weight = st.number_input("Cân nặng (kg)", min_value=30.0, max_value=200.0, value=_prev.get("weight", 60.0), step=0.5)
     with col2:
-        age = st.number_input("Tuổi", min_value=20, max_value=49, value=22)
-        activity = st.selectbox("Mức độ vận động", list(ACTIVITY_MULT.keys()))
+        age = st.number_input("Tuổi", min_value=20, max_value=49, value=_prev.get("age", 22))
+        activity = st.selectbox("Mức độ vận động", list(ACTIVITY_MULT.keys()),
+                                 index=list(ACTIVITY_MULT.keys()).index(_prev["activity"]) if _prev.get("activity") in ACTIVITY_MULT else 0)
 
     st.markdown('<span class="field-label">⚧ Giới tính</span>', unsafe_allow_html=True)
-    gender = st.radio("", ["Nam", "Nữ"], horizontal=True, key="gender_radio", label_visibility="collapsed")
+    gender = st.radio("", ["Nam", "Nữ"], horizontal=True, key="gender_radio", label_visibility="collapsed",
+                       index=["Nam", "Nữ"].index(_prev["gender"]) if _prev.get("gender") in ("Nam", "Nữ") else 0)
 
     bmi_temp = calc_bmi(weight, height)
     _, bmi_label_vn, allowed_goal_keys, bmi_icon = bmi_info(bmi_temp)
@@ -197,7 +201,8 @@ if not st.session_state.profile_done:
     st.info(f"{bmi_icon} **BMI: {bmi_temp:.1f}** — {bmi_label_vn}\n\nMục tiêu phù hợp cho bạn: **{' / '.join(allowed_goals_vn)}**")
 
     st.markdown('<span class="field-label">🎯 Mục tiêu của bạn</span>', unsafe_allow_html=True)
-    goal = st.radio("", allowed_goals_vn, horizontal=True, key="goal_radio", label_visibility="collapsed")
+    goal = st.radio("", allowed_goals_vn, horizontal=True, key="goal_radio", label_visibility="collapsed",
+                     index=allowed_goals_vn.index(_prev["goal"]) if _prev.get("goal") in allowed_goals_vn else 0)
     st.write("")
 
     if st.button("Lưu hồ sơ", use_container_width=True, type="primary"):
@@ -249,6 +254,11 @@ else:
         if tdee_clamped:
             st.caption(f"⚠️ TDEE đã được giới hạn trong khoảng {TDEE_MIN:.0f}–{TDEE_MAX:.0f} kcal vì lý do an toàn.")
         st.divider()
+        if st.button("✏️ Sửa hồ sơ", use_container_width=True):
+            st.session_state.profile_done = False
+            st.session_state.menu_done = False
+            st.session_state.user_choices = {}
+            st.rerun()
 
     # -------------------------------------------------------------------------
     # 2A: ĐÃ NHẤN GỢI Ý -> ĐỌC user_choices, GỌI ENGINE, HIỂN THỊ
