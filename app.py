@@ -255,13 +255,21 @@ else:
             st.caption(f"⚠️ TDEE đã được giới hạn trong khoảng {TDEE_MIN:.0f}–{TDEE_MAX:.0f} kcal vì lý do an toàn.")
         st.divider()
 
-    # Thanh hồ sơ, đặt ngay trong giao diện chính (không phụ thuộc sidebar)
-    st.caption(
-        f"👤 {p['gender']} · {p['age']} tuổi · {p['height']:.0f}cm · {p['weight']:.0f}kg · "
-        f"{p['activity']} · Mục tiêu: {p['goal']} &nbsp;|&nbsp; BMI {bmi:.1f} ({bmi_class}) · "
-        f"TDEE {tdee_final:,.0f} kcal",
-        unsafe_allow_html=True,
-    )
+    # Thanh hồ sơ + nút sửa, đặt ngay trong giao diện chính (không phụ thuộc sidebar)
+    bar_l, bar_r = st.columns([3, 1])
+    with bar_l:
+        st.caption(
+            f"👤 {p['gender']} · {p['age']} tuổi · {p['height']:.0f}cm · {p['weight']:.0f}kg · "
+            f"{p['activity']} · Mục tiêu: {p['goal']} &nbsp;|&nbsp; BMI {bmi:.1f} ({bmi_class}) · "
+            f"TDEE {tdee_final:,.0f} kcal",
+            unsafe_allow_html=True,
+        )
+    with bar_r:
+        if st.button("✏️ Sửa hồ sơ", use_container_width=True):
+            st.session_state.profile_done = False
+            st.session_state.menu_done = False
+            st.session_state.user_choices = {}
+            st.rerun()
     st.divider()
 
     # -------------------------------------------------------------------------
@@ -368,6 +376,10 @@ else:
 
         st.write("")
         if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
+            st.rerun()
+
+        if st.button("⬅️ Đổi bộ lọc", use_container_width=True):
+            st.session_state.menu_done = False
             st.rerun()
 
     # -------------------------------------------------------------------------
