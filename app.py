@@ -367,6 +367,8 @@ else:
             st.write("")
 
         st.write("")
+        if st.button("🔄 Gợi ý lại (món khác)", use_container_width=True):
+            st.rerun()
 
     # -------------------------------------------------------------------------
     # 2B: CHƯA NHẤN -> HIỂN THỊ CHỈ SỐ + BỘ LỌC ĐỂ CHỌN
