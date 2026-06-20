@@ -256,6 +256,17 @@ else:
     if st.session_state.menu_done:
         choices = st.session_state.user_choices
 
+        # Bảo vệ khỏi session_state cũ (schema cũ trước khi đổi sang pipeline mới)
+        # hoặc dict trống do lỗi khác — tránh KeyError, quay lại bước chọn bộ lọc.
+        _required_keys = {
+            "diet_type_key", "protein_slugs", "lunch_mode_int",
+            "dinner_mode_int", "has_snack", "snack_label",
+        }
+        if not _required_keys.issubset(choices.keys()):
+            st.session_state.menu_done = False
+            st.session_state.user_choices = {}
+            st.rerun()
+
         with st.expander("📊 Xem lại Chỉ số sức khoẻ & Bộ lọc đã chọn", expanded=False):
             st.markdown(f"**BMI:** {bmi:.1f} ({bmi_class}) &nbsp;·&nbsp; **Mục tiêu calo:** {tdee_final:,.0f} kcal")
             st.markdown(f"**Chế độ ăn:** {choices.get('diet_type')} &nbsp;·&nbsp; **Nguồn đạm:** {', '.join(choices.get('preferred_sources_vn', []))}")
